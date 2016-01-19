@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    xmlns:custom="http://schemas.android.com/apk/res-auto">
+
+    <com.example.administrator.testsliding.view.MyTopBar
+        android:id="@+id/topbar_currentResult"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        custom:leftBackground="@drawable/ic_menu_back"
+        custom:rightBackground="@drawable/iconfont_earth2"
+        custom:titleText="台站当前属性表"
+        custom:titleText_Color="#ffffff"
+        custom:titleTextSize="8sp">
+
+    </com.example.administrator.testsliding.view.MyTopBar>>
+    <TableLayout
+        android:id="@+id/tablelay_location"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:background="#ffcccccc"
+        android:layout_margin="1dp"
+        >
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="归属单位"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="识别码"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="经纬度、高度"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="中心频率(MHz)"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                >
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="等效发射功率(dBm)"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="电波传播路径损耗指数 r"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="带宽（MHz）"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="调制方式、调制参数"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="业务属性"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent"
+                >
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="时间占用度"
+                android:layout_gravity="center"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+
+        <TableRow
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#ffffffff"
+            android:layout_margin="0.5dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="是否合法"
+                android:layout_gravity="center_vertical"/>
+            <View
+                android:background="#cccccc"
+                android:layout_width="1dp"
+                android:layout_height="match_parent">
+
+            </View>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="3"
+                android:layout_gravity="center_vertical"/>
+        </TableRow>
+
+
+    </TableLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        >
+
+    </LinearLayout>
+
+</LinearLayout>

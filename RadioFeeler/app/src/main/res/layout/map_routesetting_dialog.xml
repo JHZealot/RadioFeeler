@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="600dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="15sp"
+            android:layout_marginLeft="10dp"
+            android:text="中心频率：" />
+        <EditText
+            android:id="@+id/edit1"
+            android:layout_width="150dp"
+            android:textSize="15sp"
+            android:layout_height="wrap_content"
+            android:hint="（0-65535MHz）" />
+
+
+
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
+            android:text="带宽：" />
+        <EditText
+            android:id="@+id/edit2"
+            android:textSize="15sp"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:hint="（0-255MHz）" />
+
+
+
+    </LinearLayout>
+
+        <RadioGroup
+            android:id="@+id/selectCoordinates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+           >
+
+            <RadioButton
+                android:id="@+id/radio_local"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="从本地获取数据" />
+
+            <RadioButton
+                android:id="@+id/radio_centerstation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="从中心站获取数据" />
+
+        </RadioGroup>
+
+
+        <RadioGroup
+            android:id="@+id/selectCoordinates01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radio_history"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="历史路径分布" />
+
+            <RadioButton
+                android:id="@+id/radio_timely"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="实时路径分布" />
+
+        </RadioGroup>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
+            android:text="起始时间："
+            android:background= "#11000044"/>
+        <EditText
+            android:id="@+id/edit5"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="年" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="/"/>
+        <EditText
+            android:id="@+id/edit6"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="月" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="/"/>
+        <EditText
+            android:id="@+id/edit7"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="日" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="－"/>
+        <EditText
+            android:id="@+id/edit8"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="时" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="："/>
+        <EditText
+            android:id="@+id/edit9"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="分" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
+            android:text="终止时间："
+            android:background= "#11000044"/>
+        <EditText
+            android:id="@+id/edit10"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="年" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="/"/>
+        <EditText
+            android:id="@+id/edit11"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="月" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="/"/>
+        <EditText
+            android:id="@+id/edit12"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="日" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="－"/>
+        <EditText
+            android:id="@+id/edit14"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="时" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="10sp"
+            android:text="："/>
+        <EditText
+            android:id="@+id/edit3"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:layout_height="wrap_content"
+            android:hint="分" />
+
+
+    </LinearLayout>
+
+</LinearLayout>
