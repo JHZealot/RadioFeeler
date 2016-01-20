@@ -6,13 +6,12 @@
     android:orientation="vertical">
 
 
-    <com.example.administrator.testsliding.view.GifView
-        android:id="@+id/gif1"
+    <LinearLayout
+        android:id="@+id/linearLayout1"
         android:layout_width="wrap_content"
-        android:layout_height="180dip"
-        android:layout_gravity="center_horizontal"
-        android:background="#000000"
-        android:enabled="false" />
+        android:layout_height="280dip"
+        android:orientation="vertical" >
+    </LinearLayout>
 
     <LinearLayout
         android:layout_marginTop="10dp"
@@ -23,12 +22,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/spectrum_history"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            />
 
         <Spinner
             android:id="@+id/spinner_spectrum"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content">
+            android:layout_width="150dp"
+            android:layout_marginLeft="10dp"
+            android:layout_height="wrap_content"
+            android:gravity="center">
 
         </Spinner>
     </LinearLayout>

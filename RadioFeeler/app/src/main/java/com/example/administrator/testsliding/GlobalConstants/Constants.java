@@ -26,16 +26,12 @@ public class Constants {
 
     public static Queue<List<byte[]>> Queue_RealtimeSpectrum=new LinkedList<>();//实时功率谱数据,供写文件
     public static Queue<float[]> Queue_DrawRealtimeSpectrum=new LinkedList<float[]>();
-    public static Queue<Object> Queue_BackgroundSpectrum=new LinkedList<>();//背景功率谱
+    public static Queue<float[]> Queue_BackgroundSpectrum=new LinkedList<>();//背景功率谱
     public static Queue<List<byte[]> >Queue_AbnormalFreq=new LinkedList<>();//异常频点数据供写文件
     public static Queue<byte[]> Queue_AbnormalFreq_List=new LinkedList<>();//异常频点数据供列表显示
     public static Queue<List<byte[]>> Queue_IQwave=new LinkedList<>();//IQ波形文件
 
     public static Queue<byte[]> Queue_SpectrumVSAbnormal=new LinkedList<>();//功率谱和异常频点
-
-
-    //存储频谱文件名和对应的扫频范围
-    public static Map<String,String> FileMap=new HashMap<>();
 
 
     //存储扫频范围参数及对应的起始点
@@ -50,5 +46,7 @@ public class Constants {
     public static boolean NotFill=false;//频谱数据没有收满
     public static boolean Success=false;//频谱数据接收成功
     public static Context ctx;//频谱数据
+    public  static  int  sevCount;
+
 
 }

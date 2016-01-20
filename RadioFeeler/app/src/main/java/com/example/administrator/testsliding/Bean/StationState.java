@@ -6,8 +6,8 @@ import android.os.Parcelable;
 /**
  * Created by jinaghao on 15/11/25.
  */
-public class StationState implements Parcelable {
-
+public class StationState  implements Parcelable{
+   private int equipmentID;
     private  int onNet;
     private  int model;
     private  int eastORwest;
@@ -18,7 +18,9 @@ public class StationState implements Parcelable {
     private  int atitude;
     public StationState (){}
 
+
     protected StationState(Parcel in) {
+        equipmentID = in.readInt();
         onNet = in.readInt();
         model = in.readInt();
         eastORwest = in.readInt();
@@ -41,6 +43,13 @@ public class StationState implements Parcelable {
         }
     };
 
+    public int getEquipmentID() {
+        return equipmentID;
+    }
+
+    public void setEquipmentID(int equipmentID) {
+        this.equipmentID = equipmentID;
+    }
     public void setOnNet(int onNet) {
         this.onNet = onNet;
     }
@@ -105,6 +114,7 @@ public class StationState implements Parcelable {
         return atitude;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -112,6 +122,7 @@ public class StationState implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(equipmentID);
         dest.writeInt(onNet);
         dest.writeInt(model);
         dest.writeInt(eastORwest);

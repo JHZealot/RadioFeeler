@@ -5,7 +5,9 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Environment;
 import android.os.IBinder;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -29,6 +31,7 @@ import com.example.administrator.testsliding.Bean.UploadData;
 import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.GlobalConstants.MyApplicaton;
 import com.example.administrator.testsliding.compute.ComputePara;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -39,9 +42,16 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by jinaghao on 15/11/18.
@@ -49,15 +59,25 @@ import java.util.List;
 public class MinaClientService extends Service {
 
     private IoSession session;
-    ComputePara computePara=new ComputePara();
+    private MyApplicaton mapp;
+    ComputePara computePara = new ComputePara();
     private Boolean Ispsfull = false;//queshao
-    List<byte[]> temp_powerSpectrum = new ArrayList<>();
-    List<byte[]> temp_abnormalPoint = new ArrayList<>();
+
     List<byte[]> temp_IQwave = new ArrayList<>();
     int SweepParaList_length;
 
     private int total;
     private int h;
+    private int y;
+    private int z;
+
+    public static final String PSFILE_PATH = Environment.getExternalStorageDirectory().
+            getAbsolutePath() + "/PowerSpectrumFile/";
+
+
+
+    private FileOutputStream fos;
+    private DataOutputStream dos;
 
     private BroadcastReceiver ActivityReceiver = new BroadcastReceiver() {
         @Override
@@ -435,6 +455,9 @@ public class MinaClientService extends Service {
 
     @Override
     public void onCreate() {
+        Constants.sevCount++;
+        Log.d("service", "service运行次数" + Constants.sevCount);
+        mapp= (MyApplicaton) getApplication();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantValues.InGainSet);
         filter.addAction(ConstantValues.InGainQuery);
@@ -542,7 +565,241 @@ public class MinaClientService extends Service {
         @Override
         public void messageReceived(IoSession session, final Object message) throws Exception {
             //处理从服务端接收到的消息，这个消息已经经过decode解码器把消息从字节流转化为对象
-            //处理从服务端接收到的消息，这个消息已经经过decode解码器把消息从字节流转化为对象
+
+            //==========================================功率谱解析
+            if (message instanceof PowerSpectrumAndAbnormalPonit) {
+
+                Log.d("abcd", "写文件开始时间：" + String.valueOf(System.currentTimeMillis()));
+                SweepParaList_length = Constants.SweepParaList.size();
+                final PowerSpectrumAndAbnormalPonit PSAP = (PowerSpectrumAndAbnormalPonit) message;
+                if (PSAP != null) {
+
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            List<byte[]> temp_powerSpectrum = new ArrayList<>();
+                            List<byte[]> temp_abnormalPoint = new ArrayList<>();
+
+                            byte[] b3 = null;
+                            total = PSAP.getTotalBand();
+                            int firstart = Constants.SweepParaList.get(0).getStartNum();//输入扫频范围第一组的起点对应的段号
+                            int lastend = Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum();//输入扫频范围最后一组的终点对应的段号
+                            if (PSAP.getFunctionID() == 0x0D) {//区分功率谱数据类型
+                                //判断是否为起始段
+                                if (firstart == PSAP.getPSbandNum()) {
+                                    if (Constants.spectrumCount != 0) {
+//                                        temp_powerSpectrum.clear();
+//                                        temp_abnormalPoint.clear();
+                                        Constants.spectrumCount = 0;
+
+                                    }
+                                    Constants.spectrumCount++;
+
+                                    //频谱数据
+                                    byte[] byte1 = new byte[1554];//
+                                    byte[] b1 = PSAP.getLocationandTime();
+                                    System.arraycopy(b1, 0, byte1, 0, 14);//填入位置和时间
+                                    byte[] b2 = PSAP.getSweepModel2bandNum();
+                                    System.arraycopy(b2, 0, byte1, 14, 3);//填入扫频模式，文件上传模式的信息
+                                    byte1[17] = (byte) PSAP.getPSbandNum();//输入段序号
+                                    b3 = PSAP.getPSpower();
+                                    System.arraycopy(b3, 0, byte1, 18, 1536);//填入功率谱值
+                                    if (byte1 != null)
+                                        temp_powerSpectrum.add(byte1);
+                                    //异常频点
+                                    byte[] byteAb1 = new byte[32];
+                                    byteAb1[0] = (byte) PSAP.getAPbandNum();
+                                    byteAb1[1] = (byte) PSAP.getAPnum();
+                                    byte[] ap = PSAP.getAPpower();
+                                    System.arraycopy(ap, 0, byteAb1, 2, 30);
+                                    if (byteAb1 != null)
+                                        temp_abnormalPoint.add(byteAb1);
+
+                                }
+
+                                if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() == PSAP.getPSbandNum()) {
+//                            //结束
+                                    if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() !=
+                                            Constants.SweepParaList.get(0).getStartNum()) {
+                                        Constants.spectrumCount++;
+                                        byte[] byte2 = new byte[1537];
+                                        byte2[0] = (byte) PSAP.getPSbandNum();
+                                        b3 = PSAP.getPSpower();
+                                        System.arraycopy(b3, 0, byte2, 1, 1536);//填入功率谱值
+                                        if (byte2 != null)
+                                            temp_powerSpectrum.add(byte2);
+
+                                        byte[] byteAb2 = new byte[32];
+                                        byteAb2[0] = (byte) PSAP.getAPbandNum();
+                                        byteAb2[1] = (byte) PSAP.getAPnum();
+                                        byte[] bb1 = PSAP.getAPpower();
+                                        System.arraycopy(bb1, 0, byteAb2, 2, 30);
+                                        temp_abnormalPoint.add(byteAb2);
+                                    }
+                                    if (Constants.spectrumCount == PSAP.getTotalBand()) {
+                                        File PSdir = new File(PSFILE_PATH);
+                                        if (!PSdir.exists()) {
+                                            PSdir.mkdir();
+                                        }
+                                        //取出时间
+                                        byte[] byte6 = PSAP.getLocationandTime();
+                                        int year = getYear(byte6);
+                                        int month = getMonth(byte6);
+                                        int day = getDay(byte6);
+                                        int hour = getHour(byte6);
+                                        int min = getMin(byte6);
+                                        int sec = getSecond(byte6);
+                                        //创建文件
+
+                                        /**
+                                         *
+                                         * 获取文件名
+                                         *
+                                         * public String getFileName(String pathandname){
+
+                                         int start=pathandname.lastIndexOf("/");
+                                         int end=pathandname.lastIndexOf(".");
+                                         if(start!=-1 && end!=-1){
+                                         return pathandname.substring(start+1,end);
+                                         }else{
+                                         return null;
+                                         }
+
+                                         }
+                                         */
+
+
+                                        String name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day, hour, min, sec,
+                                                Constants.ID, h++, "fine", "pwr");
+
+                                        //判断是否是一秒内的文件，如果是，需要加上1s序号
+                                        File[] PSFile = PSdir.listFiles();
+                                        if (PSFile.length > 0) {
+                                            for (int j = 0; j < PSFile.length; j++) {
+                                                if (name == PSFile[j].getName()) {
+                                                    int count = 0;
+                                                    count++;
+                                                    name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day,
+                                                            hour, min, sec, count, Constants.ID, "fine", "pwr");
+                                                }
+                                            }
+                                        }
+
+                                        File file = new File(PSdir, name);
+//                                        if (!file.exists()) {
+                                            //获取文件写入流
+                                            try{
+                                                dos=new DataOutputStream(new FileOutputStream(file));
+//                                                fos = new FileOutputStream(file);
+                                                dos.write((byte) 0x00);
+                                                for (int j = 0; j < temp_powerSpectrum.size(); j++) {
+                                                    dos.write(temp_powerSpectrum.get(j));
+                                                }
+                                                dos.write(0xff);
+                                                for (int k = 0; k < temp_abnormalPoint.size(); k++) {
+                                                    dos.write(temp_abnormalPoint.get(k));
+                                                }
+                                                dos.write(0x00);
+                                                dos.close();
+                                                y++;
+                                                Log.d("abcde","写文件个数："+y);
+
+                                            }catch (Exception e){
+                                                e.printStackTrace();
+                                            }
+
+//                                        }
+                                    }
+
+//                                    Queue myqueue=mapp.getQueue_RealtimeSpectrum();
+//                                    List<byte[]> temlist=new ArrayList<>();
+//                                    byte[] a1=new byte[]{0x01,0x02};
+//                                    byte[] a2=new byte[]{0x03,0x04};
+//                                    byte[] a3=new byte[]{0x05,0x06};
+//                                    byte[] a4=new byte[]{0x07,0x08};
+//                                    byte[] a5=new byte[]{0x09,0x0a};
+//                                    byte[] a6=new byte[]{0x0b,0x0c};
+//                                    if(z++%2==0){
+//                                        temlist.add(a1);
+//                                        temlist.add(a2);
+//                                        temlist.add(a3);
+//                                    }else {
+//                                        temlist.add(a4);
+//                                        temlist.add(a5);
+//                                        temlist.add(a6);
+//                                    }
+//                                    myqueue.offer(temlist);
+//                                    myqueue.offer(temp
+// _powerSpectrum);
+//                                    temlist.clear();
+                                    Constants.Queue_RealtimeSpectrum.offer(temp_powerSpectrum);
+//                                    temp_powerSpectrum.clear();
+//                                    temp_abnormalPoint.clear();
+                                    Constants.spectrumCount = 0;
+
+                                } else {
+                                    //中间正常
+                                    Constants.spectrumCount++;
+                                    byte[] byte3 = new byte[1537];
+                                    byte3[0] = (byte) PSAP.getPSbandNum();
+                                    b3 = PSAP.getPSpower();
+                                    System.arraycopy(b3, 0, byte3, 1, 1536);//填入功率谱值
+                                    temp_powerSpectrum.add(byte3);
+
+                                    byte[] byteAb3 = new byte[32];
+                                    byteAb3[0] = (byte) PSAP.getAPbandNum();
+                                    byteAb3[1] = (byte) PSAP.getAPnum();
+                                    byte[] bbb1 = PSAP.getAPpower();
+                                    System.arraycopy(bbb1, 0, byteAb3, 2, 30);
+                                    temp_abnormalPoint.add(byteAb3);
+                                }
+
+
+                                //存入画图
+                                float[] pow = new float[1026];
+                                pow[0] = PSAP.getTotalBand();//填入总段数
+                                pow[1] = PSAP.getPSbandNum();//输入段序号
+                                float[] f1 = computePara.Bytes2Power(b3);
+                                System.arraycopy(f1, 0, pow, 2, 1024);//填入功率谱值
+
+                                Lock lock = new ReentrantLock(); //锁对象
+                                lock.lock();
+                                try {
+                                    Constants.Queue_DrawRealtimeSpectrum.offer(pow);
+                                } catch (Exception e) {
+
+                                } finally {
+                                    lock.unlock();
+                                }
+
+                            } else {//背景功率只画图
+                                float[] pow = new float[1025];
+                                pow[0] = PSAP.getPSbandNum();//输入段序号
+                                float[] f1 = computePara.Bytes2Power(b3);
+                                System.arraycopy(f1, 0, pow, 1, 1024);//填入功率谱值
+                                Constants.Queue_BackgroundSpectrum.offer(pow);
+                            }
+
+//                            mapp= (MyApplicaton) getApplication();
+//                            Queue mQueue=mapp.getQueue_RealtimeSpectrum();
+//                            List list= (List) mQueue.poll();
+                            //=============================异常频点=================================================
+                            ////////////////存入显示列表
+                            int length = PSAP.getAPnum() * 3;
+                            byte[] abnormalList = new byte[length + 1];
+                            abnormalList[0] = (byte) PSAP.getAPbandNum();
+                            byte[] allPow = PSAP.getAPpower();
+                            System.arraycopy(allPow, 0, abnormalList, 1, length);
+                            Constants.Queue_AbnormalFreq_List.offer(abnormalList);
+                        }
+
+                    }).start();
+                }
+                Log.d("abcd", "写文件结束时间：" + String.valueOf(System.currentTimeMillis()));
+
+
+            }
 
             if (message instanceof InGain) {
                 InGain data = (InGain) message;
@@ -607,181 +864,11 @@ public class MinaClientService extends Service {
 
             }
 
-            if (message instanceof PowerSpectrumAndAbnormalPonit) {
-                Log.d("abcd", "写文件开始时间："+String.valueOf(System.currentTimeMillis()));
-
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-
-                        SweepParaList_length = Constants.SweepParaList.size();
-                        PowerSpectrumAndAbnormalPonit PSAP = (PowerSpectrumAndAbnormalPonit) message;
-                        if (PSAP != null) {
-                            byte[] byte1;
-                            byte[] b3 = null;
-                            total = PSAP.getTotalBand();
-                            int a=Constants.SweepParaList.get(0).getStartNum();
-                            int b=Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum();
-                            if (PSAP.getFunctionID() == 0x0D) {//区分功率谱数据类型
-                                //判断是否为起始段
-                                if (Constants.SweepParaList.get(0).getStartNum()
-                                        == PSAP.getPSbandNum()) {
-                                    if (Constants.spectrumCount != 0) {
-                                        temp_powerSpectrum.clear();
-                                        Constants.spectrumCount = 0;
-
-                                    }
-                                    Constants.spectrumCount++;
-
-                                    //入供写文件的队列
-                                    byte1 = new byte[1554];//
-                                    byte[] b1 = PSAP.getLocationandTime();
-                                    System.arraycopy(b1, 0, byte1, 0, 14);//填入位置和时间
-                                    byte[] b2 = PSAP.getSweepModel2bandNum();
-                                    System.arraycopy(b2, 0, byte1, 14, 3);//填入扫频模式，文件上传模式的信息
-                                    byte1[17] = (byte) PSAP.getPSbandNum();//输入段序号
-                                    b3 = PSAP.getPSpower();
-                                    System.arraycopy(b3, 0, byte1, 18, 1536);//填入功率谱值
-                                    temp_powerSpectrum.add(byte1);
-
-                                }
-
-                                if (Constants.SweepParaList.
-                                        get(SweepParaList_length - 1).getEndNum() == PSAP.getPSbandNum()) {
-//                            //结束
-                                    if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() !=
-                                            Constants.SweepParaList.get(0).getStartNum()) {
-                                        Constants.spectrumCount++;
-                                        byte[] byte2 = new byte[1537];
-                                        byte2[0] = (byte) PSAP.getPSbandNum();
-                                        b3 = PSAP.getPSpower();
-                                        System.arraycopy(b3, 0, byte2, 1, 1536);//填入功率谱值
-                                        temp_powerSpectrum.add(byte2);
-                                    }
-                                    if (Constants.spectrumCount == PSAP.getTotalBand()) {
-                                        Ispsfull = true;
-                                        Constants.Queue_RealtimeSpectrum.offer(temp_powerSpectrum);
-                                    }
-                                    temp_powerSpectrum.clear();
-                                    Constants.spectrumCount = 0;
-
-                                } else {
-                                    //中间正常
-                                    Constants.spectrumCount++;
-                                    byte[] byte2 = new byte[1537];
-                                    byte2[0] = (byte) PSAP.getPSbandNum();
-                                    b3 = PSAP.getPSpower();
-                                    System.arraycopy(b3, 0, byte2, 1, 1536);//填入功率谱值
-                                    temp_powerSpectrum.add(byte2);
-                                }
-
-//                        if(Constants.spectrumCount == PSAP.getPSbandNum()&&Constants.spectrumCount<PSAP.getTotalBand()){
-
-
-                                //存入画图
-                                float[] pow = new float[1025];
-                                pow[0] = PSAP.getPSbandNum();//输入段序号
-                                float[] f1 = computePara.Bytes2Power(b3);
-                                System.arraycopy(f1, 0, pow, 1, 1024);//填入功率谱值
-                                Constants.Queue_DrawRealtimeSpectrum.offer(pow);
-
-
-                            } else {//背景功率谱
-                                //存入画图
-                                float[] pow = new float[1025];
-                                pow[0] = PSAP.getPSbandNum();//输入段序号
-                                float[] f1 = computePara.Bytes2Power(b3);
-                                System.arraycopy(f1, 0, pow, 1, 1024);//填入功率谱值
-                                Constants.Queue_BackgroundSpectrum.offer(pow);
-
-                            }
-
-                            //=============================异常频点=================================================
-
-
-                            ////////////////存入显示列表
-                            int length = PSAP.getAPnum() * 3;
-                            byte[] abnormalList = new byte[length + 1];
-                            abnormalList[0] = (byte) PSAP.getAPbandNum();
-                            byte[] allPow = PSAP.getAPpower();
-                            System.arraycopy(allPow, 0, abnormalList, 1, length);
-                            Constants.Queue_AbnormalFreq_List.offer(abnormalList);
-
-                            //==================================================================================
-                            //判断是否为起始段
-                            if (Constants.SweepParaList.get(0).getStartNum() == PSAP.getAPbandNum()) {
-                                if (Constants.AbnormalCount != 0) {
-                                    int need = total - Constants.AbnormalCount;
-                                    byte[] byte3 = new byte[32];
-                                    for (int i = 0; i < need; i++) {
-                                        temp_abnormalPoint.add(byte3);
-                                    }
-                                    if (Ispsfull) {
-                                        Constants.Queue_AbnormalFreq.offer(temp_abnormalPoint);
-                                        Ispsfull = false;
-                                    }
-                                    temp_powerSpectrum.clear();
-                                    Constants.spectrumCount = 0;
-                                }
-                                Constants.AbnormalCount++;
-                                byte[] bytes = new byte[32];
-                                bytes[0] = (byte) PSAP.getAPbandNum();
-                                bytes[1] = (byte) PSAP.getAPnum();
-                                byte[] b1 = PSAP.getAPpower();
-                                System.arraycopy(b1, 0, bytes, 2, 30);
-                                temp_abnormalPoint.add(bytes);
-
-                            } else if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() == PSAP.getAPbandNum()) {
-                                //段尾结束
-                                if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() !=
-                                        Constants.SweepParaList.get(0).getStartNum()) {
-                                    Constants.AbnormalCount++;
-                                    byte[] bytes = new byte[32];
-                                    bytes[0] = (byte) PSAP.getAPbandNum();
-                                    bytes[1] = (byte) PSAP.getAPnum();
-                                    byte[] b1 = PSAP.getAPpower();
-                                    System.arraycopy(b1, 0, bytes, 2, 30);
-                                    temp_abnormalPoint.add(bytes);
-                                }
-                                if (Constants.AbnormalCount != total) {
-                                    int need = total - Constants.AbnormalCount;
-                                    byte[] byte4 = new byte[32];
-                                    for (int i = 0; i < need; i++) {
-                                        temp_abnormalPoint.add(byte4);
-                                    }
-                                }
-                                if (Ispsfull) {
-                                    Constants.Queue_AbnormalFreq.offer(temp_abnormalPoint);
-                                    Ispsfull = false;
-                                }
-                                temp_powerSpectrum.clear();
-                                Constants.spectrumCount = 0;
-
-
-                            } else {
-                                Constants.AbnormalCount++;
-                                byte[] bytes = new byte[32];
-                                bytes[0] = (byte) PSAP.getAPbandNum();
-                                bytes[1] = (byte) PSAP.getAPnum();
-                                byte[] b1 = PSAP.getAPpower();
-                                System.arraycopy(b1, 0, bytes, 2, 30);
-                                temp_abnormalPoint.add(bytes);
-                            }
-                        }
-
-
-                    }
-                }).start();
-                Log.d("abcd", "写文件结束时间："+String.valueOf(System.currentTimeMillis()));
-            }
 
 
 //============================IQ波形文件生成==================================================
 
-            if (message instanceof IQwave)
-
-            {
+            if (message instanceof IQwave) {
                 IQwave iQwave = new IQwave();
                 iQwave = (IQwave) message;
                 if (iQwave != null) {
@@ -837,22 +924,16 @@ public class MinaClientService extends Service {
         @Override
         public void sessionIdle(IoSession session, IdleStatus status) throws Exception {
             super.sessionIdle(session, status);
-            ReceiveWrong mReceiveWrong=new ReceiveWrong();
-            ReceiveRight mReceiveRight=new ReceiveRight();
+            ReceiveWrong mReceiveWrong = new ReceiveWrong();
+            ReceiveRight mReceiveRight = new ReceiveRight();
             //频谱数据超时重传
 //            if (((System.currentTimeMillis() - Constants.startTime) > 300)) {
-                if(Constants.NotFill) {
-                    Constants.FPGAsession.write(mReceiveWrong);
-                    Constants.NotFill=false;
-                    Constants.ctx.reset();
-                    h++;
-                    Log.d("abcd","重传次数："+h);
-//                }
-//                if(Constants.Success){
-//                    Constants.FPGAsession.write(mReceiveRight);
-//                    Constants.Success=false;
-//                }
-
+            if (Constants.NotFill) {
+                Constants.FPGAsession.write(mReceiveWrong);
+                Constants.NotFill = false;
+                Constants.ctx.reset();
+                h++;
+                Log.d("abcd", "重传次数：" + h);
 
 
             }
@@ -863,6 +944,55 @@ public class MinaClientService extends Service {
             super.exceptionCaught(session, cause);
 
         }
+    }
+
+
+    private int getYear(byte[] bytes) {
+        int year;
+        year = ((bytes[9] & 0xff) << 4) + ((bytes[10] >> 4) & 0xff);
+        return year;
+    }
+
+    private int getMonth(byte[] bytes) {
+        int month;
+        month = (bytes[10] & 0x0f);
+        return month;
+    }
+
+    private int getDay(byte[] bytes) {
+        int day;
+        day = ((bytes[11] >> 3) & 0xff);
+        return day;
+    }
+
+    private int getHour(byte[] bytes) {
+        int hour;
+        hour = (((bytes[11] & 0x07) << 2) & 0xff) + ((bytes[12] & 0x03) & 0xff);
+        return hour;
+    }
+
+    private int getMin(byte[] bytes) {
+        int min;
+        min = (bytes[12] >> 2) & 0xff;
+        return min;
+    }
+
+    private int getSecond(byte[] bytes) {
+        int second;
+        second = (bytes[13]) & 0xff;
+        return second;
+    }
+
+    private String getFileName(String path) {
+
+        int start = path.lastIndexOf("/");
+        int end = path.lastIndexOf(".");
+        if (start != -1 && end != -1) {
+            return path.substring(start + 1, end);
+        } else {
+            return null;
+        }
+
     }
 
 }

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <shape xmlns:android="http://schemas.android.com/apk/res/android" >
     <gradient android:startColor="#FF3B3B3B" android:endColor="#FFAFAFAF" android:angle="270"/>
-</shape><!-- From: file:/Users/jianghao/androidProject/testSlidingV7/flashview/src/main/res/drawable-hdpi/image_holder.xml --><!-- From: file:/Users/jianghao/androidProject/testSlidingV7/flashview/build/intermediates/bundles/debug/res/drawable-hdpi/image_holder.xml -->
+</shape><!-- From: file:/Users/jianghao/radio/RadioFeeler/flashview/src/main/res/drawable-hdpi/image_holder.xml --><!-- From: file:/Users/jianghao/radio/RadioFeeler/flashview/build/intermediates/bundles/debug/res/drawable-hdpi/image_holder.xml -->

@@ -1,8 +1,13 @@
 package com.example.administrator.testsliding.tab2;
 
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +17,28 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-
-import com.example.administrator.testsliding.view.GifView;
+import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.GlobalConstants.Constants;
 import com.example.administrator.testsliding.R;
+import com.example.administrator.testsliding.bean2server.HistorySpectrumRequest;
+import com.example.administrator.testsliding.compute.ComputePara;
 import com.example.administrator.testsliding.view.DateTimePickDialogUtil;
 
+import org.achartengine.ChartFactory;
+import org.achartengine.GraphicalView;
+import org.achartengine.chart.PointStyle;
+import org.achartengine.model.XYMultipleSeriesDataset;
+import org.achartengine.model.XYSeries;
+import org.achartengine.renderer.XYMultipleSeriesRenderer;
+import org.achartengine.renderer.XYSeriesRenderer;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 
 /**
@@ -30,20 +50,30 @@ public class Chart_spectrum extends Fragment {
     private Spinner spin;
     private List<String> list;
     private ArrayAdapter<String> adapter;
-    //GIF图
-    private GifView gif1;
+
 
     private EditText startDateTime;
     private EditText endDateTime;
     private EditText et_ID;
     private LinearLayout lilay_spectrum;
+    private ComputePara computePara = new ComputePara();
 
+    private Timer timer = new Timer();
+    private TimerTask task;
+    private Handler handler;
+    private XYSeries series;
+    private XYMultipleSeriesDataset mDataset;
+    private GraphicalView chart;
+    private XYMultipleSeriesRenderer renderer;
 
+    double[] xv = new double[1024];
+    double[] yv = new double[1024];
+    int count = 0;//段数计数器
+    private  int totalseries;//画图线条总数
+    @Nullable
     @Override
-    public void onResume() {
-        super.onResume();
-
-
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.chart_spectrum, container, false);
     }
 
     @Override
@@ -53,31 +83,66 @@ public class Chart_spectrum extends Fragment {
         initspinnerSetting();
         InitEvent();
 
+        LinearLayout layout = (LinearLayout) getActivity().findViewById(R.id.linearLayout1);
+        series = new XYSeries("");
+        mDataset = buildDataset("");
+
+        int color = Color.GREEN;
+        PointStyle style = PointStyle.CIRCLE;
+        renderer = buildRenderer(color, style, true);
+        // 设置好图表的样式
+        try {
+            if (Constants.SweepParaList.size() != 0) {
+                int firstart=Constants.SweepParaList.get(0).getStartNum();
+                int end=Constants.SweepParaList.get(Constants.SweepParaList.size() - 1).getEndNum();
+
+                setChartSettings(renderer, "频率值", "功率值", 70+(firstart-1)*25,
+                        70+(end-1)*25 , -150, 10, Color.WHITE, Color.WHITE);
+                totalseries=end-firstart+1;
+            }
+        }catch (Exception  e){
+
+        }
+       // setChartSettings(renderer, "频率值", "功率值", 70, 320, 0, 90, Color.WHITE, Color.WHITE);
+        chart = ChartFactory.getLineChartView(getActivity(), mDataset, renderer);
+
+        layout.addView(chart, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.chart_spectrum, container, false);
-    }
+
+
 
     private void initSetting() {
-        gif1 = (GifView) getActivity().findViewById(R.id.gif1);
         spin = (Spinner) getActivity().findViewById(R.id.spinner_spectrum);
-
-        lilay_spectrum = (LinearLayout)getActivity().findViewById(R.id.lilay_history);
-
+        lilay_spectrum = (LinearLayout) getActivity().findViewById(R.id.lilay_history);
         et_ID = (EditText) getActivity().findViewById(R.id.et_ID);
         // 两个输入框
         startDateTime = (EditText) getActivity().findViewById(R.id.inputDate);
         endDateTime = (EditText) getActivity().findViewById(R.id.inputDate2);
+
+//        //填数据
+//        for (int aa = 0; aa < 3; aa++) {
+//            for (int i = 1; i < 11; i++) {
+//                float[] data = new float[1026];
+//                data[0] = 10;//总共10段
+//                data[1] = i;
+//                for (int j = 0; j < 1024; j++) {
+//                    int dataY = (int) (Math.random() * 50);
+//                    data[j + 2] = dataY;
+//                }
+//                Constants.Queue_DrawRealtimeSpectrum.offer(data);
+//            }
+//        }
     }
 
     private void initspinnerSetting() {
 
         //1,设置数据源
         list = new ArrayList<String>();
-        list.add("当前数据");
+        list.add("请选择 ");
+        list.add("实时数据");
         list.add("历史数据");
 
         //2.新建数组适配器
@@ -91,28 +156,115 @@ public class Chart_spectrum extends Fragment {
     }
 
     private void InitEvent() {
-        // 设置背景gif图片资源
-        gif1.setMovieResource(R.drawable.pinputu);
         //spinner
         spin.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (id == 1) {
+                if (id == 2) {
                     lilay_spectrum.setVisibility(View.VISIBLE);
                     //历史数据需要设置内容
                     DateEvent();
-                }
-                else if (id==0){
+                    HistorySpectrumRequest spec = new HistorySpectrumRequest();
+                    try {
+                        spec.setEqiupmentID(Constants.ID);
+                        if (!et_ID.getText().toString().equals("")) {
+                            spec.setIDcard(Integer.parseInt(et_ID.getText().toString()));
+                        }
+                        if (!startDateTime.getText().toString().equals("")) {
+                            byte[] bytes = computePara.Time2Bytes(startDateTime.getText().toString());
+                            spec.setStartTime(bytes);
+                        }
+                        if (!endDateTime.getText().toString().equals("")) {
+                            byte[] bytes = computePara.Time2Bytes(endDateTime.getText().toString());
+                            spec.setEndTime(bytes);
+                        }
+//                        BroadcastHelper.sendBroadCast(getActivity(),
+//                                ConstantValues.SERVICE_SPECTRUM, "service_spectrum", spec);
+                    } catch (Exception e) {
+
+                    }
+                } else if (id == 1) {
                     lilay_spectrum.setVisibility(View.GONE);
+                    handler = new Handler() {
+                        @Override
+                        public void handleMessage(Message msg) {
+                            // 刷新图表
+                            updateChart();
+                            super.handleMessage(msg);
+                        }
+                    };
+
+                    task = new TimerTask() {
+                        @Override
+                        public void run() {
+                            Message message = new Message();
+                            message.what = 1;
+                            handler.sendMessage(message);
+                        }
+                    };
+
+                    timer.schedule(task, 1000, 1000);
+
                 }
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
     }
+    private void updateChart() {
+        float[] data = null;
 
+        Lock lock = new ReentrantLock(); //锁对象
+        lock.lock();
+        try {
+            if (!Constants.Queue_DrawRealtimeSpectrum.isEmpty()) {
+                data = Constants.Queue_DrawRealtimeSpectrum.poll();
+            }
+        } catch (Exception e) {
+
+        } finally {
+            lock.unlock();
+        }
+        if (data != null) {
+            int flag = 0;
+            int total = (int) data[0];
+            //判断是否为新一轮
+            if (count == total) {
+                count = 0;
+            }
+            count++;
+            int circle = 1024 / total;
+            double dataX = (data[1] - 1) * 25 + 70;
+            float max = data[2];
+            //抽取
+            for (int i = 0; i < circle; i++) {
+                max = data[i * total + 2];
+                for (int j = 0; j < total; j++) {
+                    if (data[j + i * total + 2] > max) {
+                        max = data[j + i * total + 2];
+                        flag = j + i * total + 2;
+                    }
+                }
+                xv[i] = dataX + flag * 25.0 / 1024.0;
+                yv[i] = max;
+            }
+            series = mDataset.getSeriesAt(count - 1);
+            mDataset.removeSeries(count - 1);
+
+            // 点集先清空，为了做成新的点集而准备
+            series.clear();
+            for (int k = 0; k < circle; k++) {
+                series.add(xv[k], yv[k]);
+            }
+            // 在数据集中添加新的点集
+            mDataset.addSeries(count - 1, series);
+            chart.invalidate();
+        }
+
+    }
     private void DateEvent() {
         startDateTime.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -132,6 +284,77 @@ public class Chart_spectrum extends Fragment {
             }
         });
     }
+
+
+    @Override
+    public void onDestroy() {
+        // 当结束程序时关掉Timer
+        timer.cancel();
+        super.onDestroy();
+    }
+
+    protected XYMultipleSeriesDataset buildDataset(String titles) {
+        XYMultipleSeriesDataset dataset = new XYMultipleSeriesDataset();
+
+        int length = totalseries;            //有几条线
+        for (int i = 0; i < length; i++) {
+            XYSeries series = new XYSeries(titles);    //根据每条线的名称创建
+            dataset.addSeries(series);
+        }
+        return dataset;
+    }
+
+    protected XYMultipleSeriesRenderer buildRenderer(int color,
+                                                     PointStyle style, boolean fill) {
+        XYMultipleSeriesRenderer renderer = new XYMultipleSeriesRenderer();
+        // 设置图表中曲线本身的样式，包括颜色、点的大小以及线的粗细等
+        int length = totalseries;
+        for (int i = 0; i < length; i++) {
+            XYSeriesRenderer r = new XYSeriesRenderer();
+            r.setColor(color);
+            r.setPointStyle(style);
+            r.setFillPoints(fill);
+            r.setLineWidth(5);
+            renderer.addSeriesRenderer(r);
+        }
+
+        return renderer;
+    }
+    protected void setChartSettings(XYMultipleSeriesRenderer renderer,
+                                    String xTitle, String yTitle, double xMin, double xMax,
+                                    double yMin, double yMax, int axesColor, int labelsColor) {
+        // 有关对图表的渲染可参看api文档
+        renderer.setChartTitle("频谱图");//
+        renderer.setXTitle(xTitle);
+        renderer.setYTitle(yTitle);
+        renderer.setAxisTitleTextSize(30);
+        renderer.setChartTitleTextSize(30);
+        renderer.setXAxisMin(xMin);
+        renderer.setXAxisMax(xMax);
+        renderer.setYAxisMin(yMin);
+        renderer.setYAxisMax(yMax);
+        renderer.setAxesColor(axesColor);
+        renderer.setLabelsColor(labelsColor);
+        renderer.setLabelsTextSize(30);
+        renderer.setShowGrid(true);
+        renderer.setGridColor(Color.GREEN);
+        renderer.setXLabels(20);
+        renderer.setYLabels(10);
+        renderer.setYLabelsAlign(Paint.Align.RIGHT);
+        renderer.setPointSize((float) 2);
+        renderer.setShowLegend(false);
+        renderer.setZoomEnabled(true);// 设置渲染器允许放大缩小
+        renderer.setZoomButtonsVisible(true);
+        /**以下为自己修改
+         *
+         */
+        //设定背景颜色
+        renderer.setApplyBackgroundColor(true);
+        renderer.setBackgroundColor(Color.BLACK);
+        //renderer.setBarSpacing(1);
+    }
+
+
 }
 
 

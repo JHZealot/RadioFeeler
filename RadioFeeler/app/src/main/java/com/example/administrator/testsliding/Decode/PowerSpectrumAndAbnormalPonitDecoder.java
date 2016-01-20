@@ -16,6 +16,7 @@ import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 import org.apache.mina.filter.codec.demux.MessageDecoder;
 import org.apache.mina.filter.codec.demux.MessageDecoderResult;
 
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -119,6 +120,7 @@ public class PowerSpectrumAndAbnormalPonitDecoder implements MessageDecoder {
                             long a=  System.currentTimeMillis();
                             Log.d("abcd", "解码开始时间："+String.valueOf(System.currentTimeMillis()));
                             PowerSpectrumAndAbnormalPonit  PSAP =byte2Object(b);
+                    Log.d("psap", Arrays.toString(PSAP.getPSpower()));
                             if (PSAP!= null) {
 
                                 TimerTask task = new TimerTask(){
@@ -131,6 +133,7 @@ public class PowerSpectrumAndAbnormalPonitDecoder implements MessageDecoder {
                                 timer.schedule(task,200);
 
                                 out.write(PSAP);
+                                Log.d("psap", Arrays.toString(b));
 
                                 Constants.Success=true;
                                 Constants.NotFill=false;//收成功，NotFill表示没满的变量
@@ -206,7 +209,7 @@ public class PowerSpectrumAndAbnormalPonitDecoder implements MessageDecoder {
         PSAP.setAPbandNum((bytes[1559 + 18] & 0xff));
         PSAP.setAPnum((bytes[1559 + 19] & 0xff));
         byte[] b4 = new byte[30];
-        System.arraycopy(bytes, 1559 + 20, b2, 0, 30);
+        System.arraycopy(bytes, 1559 + 20, b4, 0, 30);
         PSAP.setAPpower(b4);
 
         return PSAP;

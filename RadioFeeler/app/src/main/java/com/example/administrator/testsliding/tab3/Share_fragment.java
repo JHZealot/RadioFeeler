@@ -1,5 +1,6 @@
 package com.example.administrator.testsliding.tab3;
 
+import android.app.Application;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Looper;
@@ -13,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.administrator.testsliding.Bean.ToServerPowerSpectrumAndAbnormalPoint;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.GlobalConstants.MyApplicaton;
 import com.example.administrator.testsliding.R;
 
 import java.io.BufferedInputStream;
@@ -26,6 +28,9 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Administrator on 2015/7/21.
@@ -37,6 +42,7 @@ public class Share_fragment extends Fragment {
     private Button mCreateIQ;
     private List mPowerSpectrum;
     private List mAbnormalPoint;
+    private MyApplicaton mapp;
 
     private List mIQ;
     private FileOutputStream fos;
@@ -50,6 +56,12 @@ public class Share_fragment extends Fragment {
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
+        if (!Constants.Queue_DrawRealtimeSpectrum.isEmpty()) {
+            float[] data = Constants.Queue_DrawRealtimeSpectrum.poll();
+        }
+        mapp= (MyApplicaton) getActivity().getApplication();
+        Queue mQueue=mapp.getQueue_RealtimeSpectrum();
         InitSetting();
         InitEvent();
     }
@@ -76,7 +88,6 @@ public class Share_fragment extends Fragment {
                     @Override
                     public void run() {
                         Looper.prepare();
-
                         int h = 0;
                         ArrayList fileName = GetFileName(PSFILE_PATH);
                         while(true){
@@ -221,6 +232,9 @@ public class Share_fragment extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                       Queue mm= Constants.Queue_RealtimeSpectrum;
+
+                        Queue mQueue=mapp.getQueue_RealtimeSpectrum();
 
                         File PSdir = new File(PSFILE_PATH);
                         if (!PSdir.exists()) {
@@ -229,10 +243,15 @@ public class Share_fragment extends Fragment {
                         /**
                          生成功率谱文件
                          */
-                        if (!Constants.Queue_RealtimeSpectrum.isEmpty()) {
-                            for (int i = 0; i < Constants.Queue_RealtimeSpectrum.size(); i++) {
-                                mPowerSpectrum = Constants.Queue_RealtimeSpectrum.poll();
-                                mAbnormalPoint = Constants.Queue_AbnormalFreq.poll();
+                        Lock lock = new ReentrantLock(); //锁对象
+                        lock.lock();
+
+                        try {
+
+                        if (!mQueue.isEmpty()) {
+                            for (int i = 0; i < mQueue.size(); i++) {
+                                mPowerSpectrum = (List)mQueue.poll();
+//                                mAbnormalPoint = Constants.Queue_AbnormalFreq.poll();
                                 //取出时间
                                 byte[] byte1 = (byte[]) mPowerSpectrum.get(0);
                                 int year = getYear(byte1);
@@ -278,6 +297,11 @@ public class Share_fragment extends Fragment {
                             }
 
                             Toast.makeText(getContext(), "功率谱文件写入完毕", Toast.LENGTH_SHORT).show();
+                        }
+                        }catch (Exception e){
+
+                        }finally {
+                            lock.unlock();
                         }
 
                     }

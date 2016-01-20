@@ -45,6 +45,7 @@ public class StationStateDecoder implements MessageDecoder {
                 buffer.flip();
                 byte[] accept=new byte[17];
                 buffer.get(accept);
+                stationState.setEquipmentID((accept[2]&0xff)+((accept[3]&0xff)<<8));
                 stationState.setOnNet(accept[4]);
                 stationState.setModel(accept[5]);
                 stationState.setEastORwest(accept[6]);

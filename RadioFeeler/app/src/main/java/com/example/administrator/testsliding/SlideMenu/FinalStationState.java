@@ -15,6 +15,7 @@ import com.example.administrator.testsliding.Bean.Query;
 import com.example.administrator.testsliding.Bean.StationState;
 import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.GlobalConstants.Constants;
 import com.example.administrator.testsliding.R;
 
 /**
@@ -38,7 +39,7 @@ public class FinalStationState extends Activity {
                 String s1net;
 
                 String s2model=null;
-
+                Constants.ID=data.getEquipmentID();//将ID号存下
                 int onNet=data.getOnNet();
                 int model=data.getModel();
                 int eastORwest=data.getEastORwest();
