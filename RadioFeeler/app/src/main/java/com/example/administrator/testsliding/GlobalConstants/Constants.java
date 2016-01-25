@@ -25,7 +25,7 @@ public class Constants {
     public static IoSession SERVERsession=null;
 
     public static Queue<List<byte[]>> Queue_RealtimeSpectrum=new LinkedList<>();//实时功率谱数据,供写文件
-    public static Queue<float[]> Queue_DrawRealtimeSpectrum=new LinkedList<float[]>();
+    public static Queue<List<float[]>> Queue_DrawRealtimeSpectrum= new LinkedList<>();
     public static Queue<float[]> Queue_BackgroundSpectrum=new LinkedList<>();//背景功率谱
     public static Queue<List<byte[]> >Queue_AbnormalFreq=new LinkedList<>();//异常频点数据供写文件
     public static Queue<byte[]> Queue_AbnormalFreq_List=new LinkedList<>();//异常频点数据供列表显示

@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -76,6 +78,8 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
     private int fixThreshold;
 
     private boolean isFixedGate;
+
+
 
     private BroadcastReceiver ServiceReceiver=new BroadcastReceiver() {
         @Override

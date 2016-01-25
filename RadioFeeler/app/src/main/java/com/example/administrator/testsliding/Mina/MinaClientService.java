@@ -580,7 +580,7 @@ public class MinaClientService extends Service {
 
                             List<byte[]> temp_powerSpectrum = new ArrayList<>();
                             List<byte[]> temp_abnormalPoint = new ArrayList<>();
-
+                            List<float[]> temp_drawSpectrum=new ArrayList<float[]>();
                             byte[] b3 = null;
                             total = PSAP.getTotalBand();
                             int firstart = Constants.SweepParaList.get(0).getStartNum();//输入扫频范围第一组的起点对应的段号
@@ -616,6 +616,14 @@ public class MinaClientService extends Service {
                                     if (byteAb1 != null)
                                         temp_abnormalPoint.add(byteAb1);
 
+                                    //存入画图
+                                    float[] pow = new float[1026];
+                                    pow[0] = PSAP.getTotalBand();//填入总段数
+                                    pow[1] = PSAP.getPSbandNum();//输入段序号
+                                    float[] f1 = computePara.Bytes2Power(b3);
+                                    System.arraycopy(f1, 0, pow, 2, 1024);//填入功率谱值
+                                    temp_drawSpectrum.add(pow);
+
                                 }
 
                                 if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() == PSAP.getPSbandNum()) {
@@ -636,6 +644,12 @@ public class MinaClientService extends Service {
                                         byte[] bb1 = PSAP.getAPpower();
                                         System.arraycopy(bb1, 0, byteAb2, 2, 30);
                                         temp_abnormalPoint.add(byteAb2);
+
+//                                        float[] pow = new float[1025];
+//                                        pow[0] = PSAP.getPSbandNum();//输入段序号
+                                        float[] f1 = computePara.Bytes2Power(b3);
+//                                        System.arraycopy(f1, 0, pow, 1, 1024);//填入功率谱值
+                                        temp_drawSpectrum.add(f1);
                                     }
                                     if (Constants.spectrumCount == PSAP.getTotalBand()) {
                                         File PSdir = new File(PSFILE_PATH);
@@ -671,7 +685,7 @@ public class MinaClientService extends Service {
 
 
                                         String name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day, hour, min, sec,
-                                                Constants.ID, h++, "fine", "pwr");
+                                               0 , Constants.ID, "fine", "pwr");
 
                                         //判断是否是一秒内的文件，如果是，需要加上1s序号
                                         File[] PSFile = PSdir.listFiles();
@@ -733,7 +747,22 @@ public class MinaClientService extends Service {
 //                                    myqueue.offer(temp
 // _powerSpectrum);
 //                                    temlist.clear();
-                                    Constants.Queue_RealtimeSpectrum.offer(temp_powerSpectrum);
+//                                    synchronized (this){
+
+                                       // Constants.Queue_RealtimeSpectrum.offer(temp_powerSpectrum);
+//                                    }
+                                    Lock lock = new ReentrantLock(); //锁对象
+                                    lock.lock();
+                                    try {
+                                        Constants.Queue_DrawRealtimeSpectrum.offer(temp_drawSpectrum);
+                                    } catch (Exception e) {
+
+                                    } finally {
+                                        lock.unlock();
+                                    }
+
+
+
 //                                    temp_powerSpectrum.clear();
 //                                    temp_abnormalPoint.clear();
                                     Constants.spectrumCount = 0;
@@ -753,6 +782,11 @@ public class MinaClientService extends Service {
                                     byte[] bbb1 = PSAP.getAPpower();
                                     System.arraycopy(bbb1, 0, byteAb3, 2, 30);
                                     temp_abnormalPoint.add(byteAb3);
+
+                                    //float[] pow = new float[1024];
+                                    float[] f1 = computePara.Bytes2Power(b3);
+                                    //System.arraycopy(f1, 0, pow, 2, 1024);//填入功率谱值
+                                    temp_drawSpectrum.add(f1);
                                 }
 
 
@@ -766,7 +800,7 @@ public class MinaClientService extends Service {
                                 Lock lock = new ReentrantLock(); //锁对象
                                 lock.lock();
                                 try {
-                                    Constants.Queue_DrawRealtimeSpectrum.offer(pow);
+                                   // Constants.Queue_DrawRealtimeSpectrum.offer(pow);
                                 } catch (Exception e) {
 
                                 } finally {

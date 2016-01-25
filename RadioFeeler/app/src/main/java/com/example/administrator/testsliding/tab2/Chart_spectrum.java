@@ -7,7 +7,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,7 +16,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 
-import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
 import com.example.administrator.testsliding.R;
 import com.example.administrator.testsliding.bean2server.HistorySpectrumRequest;
@@ -33,7 +31,6 @@ import org.achartengine.renderer.XYMultipleSeriesRenderer;
 import org.achartengine.renderer.XYSeriesRenderer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -69,7 +66,7 @@ public class Chart_spectrum extends Fragment {
     double[] xv = new double[1024];
     double[] yv = new double[1024];
     int count = 0;//段数计数器
-    private  int totalseries;//画图线条总数
+    private  int totalseries=1;//画图线条总数
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -91,19 +88,19 @@ public class Chart_spectrum extends Fragment {
         PointStyle style = PointStyle.CIRCLE;
         renderer = buildRenderer(color, style, true);
         // 设置好图表的样式
-        try {
+//        try {
             if (Constants.SweepParaList.size() != 0) {
                 int firstart=Constants.SweepParaList.get(0).getStartNum();
                 int end=Constants.SweepParaList.get(Constants.SweepParaList.size() - 1).getEndNum();
 
                 setChartSettings(renderer, "频率值", "功率值", 70+(firstart-1)*25,
                         70+(end-1)*25 , -150, 10, Color.WHITE, Color.WHITE);
-                totalseries=end-firstart+1;
-            }
-        }catch (Exception  e){
-
-        }
-       // setChartSettings(renderer, "频率值", "功率值", 70, 320, 0, 90, Color.WHITE, Color.WHITE);
+               // totalseries=end-firstart+1;
+           }
+//        }catch (Exception  e){
+//
+//        }
+       setChartSettings(renderer, "频率值", "功率值", 95, 110, -150, 10, Color.WHITE, Color.WHITE);
         chart = ChartFactory.getLineChartView(getActivity(), mDataset, renderer);
 
         layout.addView(chart, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT,
@@ -215,53 +212,57 @@ public class Chart_spectrum extends Fragment {
         });
     }
     private void updateChart() {
-        float[] data = null;
+        List<float[]> listdata = new ArrayList<>();
+
 
         Lock lock = new ReentrantLock(); //锁对象
         lock.lock();
         try {
             if (!Constants.Queue_DrawRealtimeSpectrum.isEmpty()) {
-                data = Constants.Queue_DrawRealtimeSpectrum.poll();
+                listdata = Constants.Queue_DrawRealtimeSpectrum.poll();
             }
         } catch (Exception e) {
 
         } finally {
             lock.unlock();
         }
-        if (data != null) {
+        if (listdata != null) {
             int flag = 0;
-            int total = (int) data[0];
-            //判断是否为新一轮
-            if (count == total) {
-                count = 0;
-            }
-            count++;
-            int circle = 1024 / total;
-            double dataX = (data[1] - 1) * 25 + 70;
-            float max = data[2];
-            //抽取
-            for (int i = 0; i < circle; i++) {
-                max = data[i * total + 2];
-                for (int j = 0; j < total; j++) {
-                    if (data[j + i * total + 2] > max) {
-                        max = data[j + i * total + 2];
-                        flag = j + i * total + 2;
-                    }
+            for (int mj = 0; mj < listdata.size(); mj++) {
+                float[] data =listdata.get(mj);
+                int total = (int) data[0];
+                //判断是否为新一轮
+                if (count == total) {
+                    count = 0;
                 }
-                xv[i] = dataX + flag * 25.0 / 1024.0;
-                yv[i] = max;
-            }
-            series = mDataset.getSeriesAt(count - 1);
-            mDataset.removeSeries(count - 1);
+                count++;
+                int circle = 1024 / total;
+                double dataX = (data[1] - 1) * 25 + 70;
+                float max = data[2];
+                //抽取
+                for (int i = 0; i < circle; i++) {
+                    max = data[i * total + 2];
+                    for (int j = 0; j < total; j++) {
+                        if (data[j + i * total + 2] >=max) {
+                            max = data[j + i * total + 2];
+                            flag = j + i * total + 2;
+                        }
+                    }
+                    xv[i] = dataX + flag * 25.0 / 1024.0;
+                    yv[i] = max;
+                }
+                series = mDataset.getSeriesAt(count - 1);
+                mDataset.removeSeries(count - 1);
 
-            // 点集先清空，为了做成新的点集而准备
-            series.clear();
-            for (int k = 0; k < circle; k++) {
-                series.add(xv[k], yv[k]);
+                // 点集先清空，为了做成新的点集而准备
+                series.clear();
+                for (int k = 0; k < circle; k++) {
+                    series.add(xv[k], yv[k]);
+                }
+                // 在数据集中添加新的点集
+                mDataset.addSeries(count - 1, series);
+                chart.invalidate();
             }
-            // 在数据集中添加新的点集
-            mDataset.addSeries(count - 1, series);
-            chart.invalidate();
         }
 
     }
@@ -338,7 +339,7 @@ public class Chart_spectrum extends Fragment {
         renderer.setLabelsTextSize(30);
         renderer.setShowGrid(true);
         renderer.setGridColor(Color.GREEN);
-        renderer.setXLabels(20);
+        renderer.setXLabels(10);
         renderer.setYLabels(10);
         renderer.setYLabelsAlign(Paint.Align.RIGHT);
         renderer.setPointSize((float) 2);
