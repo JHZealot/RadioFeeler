@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Environment;
 import android.os.IBinder;
-import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.Toast;
@@ -49,7 +48,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -667,22 +665,8 @@ public class MinaClientService extends Service {
                                         //创建文件
 
                                         /**
-                                         *
                                          * 获取文件名
-                                         *
-                                         * public String getFileName(String pathandname){
-
-                                         int start=pathandname.lastIndexOf("/");
-                                         int end=pathandname.lastIndexOf(".");
-                                         if(start!=-1 && end!=-1){
-                                         return pathandname.substring(start+1,end);
-                                         }else{
-                                         return null;
-                                         }
-
-                                         }
                                          */
-
 
                                         String name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day, hour, min, sec,
                                                0 , Constants.ID, "fine", "pwr");
@@ -701,7 +685,7 @@ public class MinaClientService extends Service {
                                         }
 
                                         File file = new File(PSdir, name);
-//                                        if (!file.exists()) {
+//
                                             //获取文件写入流
                                             try{
                                                 dos=new DataOutputStream(new FileOutputStream(file));
@@ -721,36 +705,15 @@ public class MinaClientService extends Service {
 
                                             }catch (Exception e){
                                                 e.printStackTrace();
+                                            }finally {
+                                                try {
+                                                    dos.close();
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
                                             }
-
-//                                        }
                                     }
 
-//                                    Queue myqueue=mapp.getQueue_RealtimeSpectrum();
-//                                    List<byte[]> temlist=new ArrayList<>();
-//                                    byte[] a1=new byte[]{0x01,0x02};
-//                                    byte[] a2=new byte[]{0x03,0x04};
-//                                    byte[] a3=new byte[]{0x05,0x06};
-//                                    byte[] a4=new byte[]{0x07,0x08};
-//                                    byte[] a5=new byte[]{0x09,0x0a};
-//                                    byte[] a6=new byte[]{0x0b,0x0c};
-//                                    if(z++%2==0){
-//                                        temlist.add(a1);
-//                                        temlist.add(a2);
-//                                        temlist.add(a3);
-//                                    }else {
-//                                        temlist.add(a4);
-//                                        temlist.add(a5);
-//                                        temlist.add(a6);
-//                                    }
-//                                    myqueue.offer(temlist);
-//                                    myqueue.offer(temp
-// _powerSpectrum);
-//                                    temlist.clear();
-//                                    synchronized (this){
-
-                                       // Constants.Queue_RealtimeSpectrum.offer(temp_powerSpectrum);
-//                                    }
                                     Lock lock = new ReentrantLock(); //锁对象
                                     lock.lock();
                                     try {
@@ -760,11 +723,6 @@ public class MinaClientService extends Service {
                                     } finally {
                                         lock.unlock();
                                     }
-
-
-
-//                                    temp_powerSpectrum.clear();
-//                                    temp_abnormalPoint.clear();
                                     Constants.spectrumCount = 0;
 
                                 } else {
@@ -815,9 +773,6 @@ public class MinaClientService extends Service {
                                 Constants.Queue_BackgroundSpectrum.offer(pow);
                             }
 
-//                            mapp= (MyApplicaton) getApplication();
-//                            Queue mQueue=mapp.getQueue_RealtimeSpectrum();
-//                            List list= (List) mQueue.poll();
                             //=============================异常频点=================================================
                             ////////////////存入显示列表
                             int length = PSAP.getAPnum() * 3;

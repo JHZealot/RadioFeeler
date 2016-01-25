@@ -16,9 +16,9 @@ import android.widget.Toast;
 
 import com.example.administrator.testsliding.Bean.ToServerPowerSpectrumAndAbnormalPoint;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
-import com.example.administrator.testsliding.GlobalConstants.MyApplicaton;
 import com.example.administrator.testsliding.R;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -27,9 +27,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Queue;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by Administrator on 2015/7/21.
@@ -37,15 +34,15 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Share_fragment extends Fragment {
     private Button mUpload;
     private Button mDownload;
-    private Button mCreatePS;
     private Button mCreateIQ;
-    private List mPowerSpectrum;
-    private List mAbnormalPoint;
-    private MyApplicaton mapp;
+
     private SeekBar mSeekbar;
 
     private List mIQ;
     private FileOutputStream fos;
+
+    FileInputStream fis;
+    DataInputStream dis;
 
     public static final String PSFILE_PATH = Environment.getExternalStorageDirectory().
             getAbsolutePath() + "/PowerSpectrumFile/";
@@ -65,220 +62,91 @@ public class Share_fragment extends Fragment {
 
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-
-        mapp = (MyApplicaton) getActivity().getApplication();
-        Queue mQueue = mapp.getQueue_RealtimeSpectrum();
         InitSetting();
-
         InitEvent();
     }
 
     private void InitSetting() {
         mUpload = (Button) getActivity().findViewById(R.id.upload);
         mDownload = (Button) getActivity().findViewById(R.id.download);
-        mCreatePS = (Button) getActivity().findViewById(R.id.ps_localsave);
         mCreateIQ = (Button) getActivity().findViewById(R.id.iq_localsave);
         mSeekbar = (SeekBar) getActivity().findViewById(R.id.progress_seekbar);
-
-
     }
 
     public void InitEvent() {
-
         /**
          * 上传文件按钮
          */
-
         mUpload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 mSeekbar.setVisibility(View.VISIBLE);
                 mSeekbar.setMax(10);
-
                 new Thread(new Runnable() {
-                    int a;
-
+                    int uploadFileCount;
                     @Override
                     public void run() {
                         Looper.prepare();
                         ArrayList fileName = GetFileName(PSFILE_PATH);
-
-
-//                        long time=System.currentTimeMillis();
                         for (int i = 0; i < fileName.size(); i++) {
+                            //上传文件达到十分之一时候更新进度条
                             if (i % (fileName.size()) / 10 == 0) {
-
-//                            if(System.currentTimeMillis()-time>500){
-//                                time=System.currentTimeMillis();
-                                a++;
+                                uploadFileCount++;
+                                handler.obtainMessage(1, uploadFileCount).sendToTarget();
+                            }
+                            //上传文件
+                            File file = new File(PSFILE_PATH,
+                                    String.valueOf(fileName.get(i)));
+                            try {
+                                fis = new FileInputStream(file);
+                                dis = new DataInputStream(fis);
+                                byte[] content = new byte[fis.available()];
+                                byte[] buffer = new byte[content.length];
+                                while ((fis.read(buffer)) != -1) {
+                                    content = buffer;
+                                }
+                                //将文件里的内容转化为对象
+                                ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                ToPS.setContent(content);
+                                ToPS.setContentLength(content.length);
+                                ToPS.setFileName(String.valueOf(fileName.get(i)));
+                                ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                //将功率谱对象用服务器的session发出去
+                                Constants.SERVERsession.write(ToPS);
+                            } catch (FileNotFoundException e) {
+                                e.printStackTrace();
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                Looper.loop();// 进入loop中的循环，查看消息队列
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                Looper.loop();// 进入loop中的循环，查看消息队列
+                            }finally {
                                 try {
-                                    Thread.sleep(300);
-                                } catch (InterruptedException e) {
+                                    fis.close();
+                                    dis.close();
+                                } catch (IOException e) {
                                     e.printStackTrace();
                                 }
-                                handler.obtainMessage(1, a).sendToTarget();
                             }
-
-
-//                            File file = new File(PSFILE_PATH,
-//                                    String.valueOf(fileName.get(i)));
-//                            try {
-//                                FileInputStream fis = new FileInputStream(file);
-//                                // 一次读一个字节
-////                                byte[] content = new byte[fis.available()];
-//                                byte[] content = new byte[4000];
-//                                int temp;
-//                                byte[] buffer=new byte[4000] ;
-//                                while ((temp = fis.read(buffer)) != -1) {
-//                                    content = buffer;
-//                                    h++;
-//                                }
-//                                h = 0;
-//                                ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
-//                                ToPS.setContent(content);
-//                                ToPS.setContentLength(content.length);
-//                                ToPS.setFileName(String.valueOf(fileName.get(i)));
-//                                ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
-//
-//                                Constants.SERVERsession.write(ToPS);
-//
-//                            } catch (FileNotFoundException e) {
-//                                e.printStackTrace();
-//                            } catch (IOException e) {
-//                                e.printStackTrace();
-//
-//                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-//                                Looper.loop();// 进入loop中的循环，查看消息队列
-//                            }catch (Exception e) {
-//                                e.printStackTrace();
-//                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-//                                Looper.loop();// 进入loop中的循环，查看消息队列
-//                            }
                         }
+                        Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
                     }
-
                 }).start();
-//                Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
             }
         });
 
+        /**
+         * 从服务器下载历史文件
+         */
         mDownload.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-
-
-                        File PSdir = new File(PSFILE_PATH);
-                        if (!PSdir.exists()) {
-                            PSdir.mkdir();
-                        }
-                        for (int j = 0; j < 400000; j++) {
-                            //创建文件
-                            String name = String.format("%d-%d-%d-%d-%d-%d-%d.%s", 2016, 7, 8, 9, 9, j,
-                                    2, "pwr");
-                            File file = new File(PSdir, name);
-
-                            try {
-                                fos = new FileOutputStream(file);
-                                fos.write(0x00);
-                                for (int i = 0; i < 3998; i++) {
-                                    fos.write(0x02);
-                                }
-                                fos.write(0x00);
-                                fos.close();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    }
-                }).start();
-                Toast.makeText(getActivity(), "下载成功", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        /**
-         * 生成文件
-         */
-        mCreatePS.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Queue mm = Constants.Queue_RealtimeSpectrum;
-
-                        Queue mQueue = mapp.getQueue_RealtimeSpectrum();
-
-                        File PSdir = new File(PSFILE_PATH);
-                        if (!PSdir.exists()) {
-                            PSdir.mkdir();
-                        }
-                        /**
-                         生成功率谱文件
-                         */
-                        Lock lock = new ReentrantLock(); //锁对象
-                        lock.lock();
-
-                        try {
-
-                            if (!mQueue.isEmpty()) {
-                                for (int i = 0; i < mQueue.size(); i++) {
-                                    mPowerSpectrum = (List) mQueue.poll();
-//                                mAbnormalPoint = Constants.Queue_AbnormalFreq.poll();
-                                    //取出时间
-                                    byte[] byte1 = (byte[]) mPowerSpectrum.get(0);
-                                    int year = getYear(byte1);
-                                    int month = getMonth(byte1);
-                                    int day = getDay(byte1);
-                                    int hour = getHour(byte1);
-                                    int min = getMin(byte1);
-                                    int sec = getSecond(byte1);
-                                    //创建文件
-                                    String name = String.format("%d-%d-%d-%d-%d-%d.%s", year, month, day, hour, min, sec,
-                                            Constants.ID, "pwr");
-//
-                                    File file = new File(PSdir, name);
-
-                                    if (!file.exists()) {
-                                        try {
-//                                        //在指定的文件夹中创建文件
-//                                        file.createNewFile();
-                                            //获取文件写入流
-                                            fos = new FileOutputStream(file);
-                                            fos.write((byte) 0x00);
-                                            for (int j = 0; j < mPowerSpectrum.size(); j++) {
-                                                fos.write((byte[]) mPowerSpectrum.get(j));
-                                            }
-                                            fos.write(0xff);
-                                            for (int k = 0; k < mAbnormalPoint.size(); k++) {
-                                                fos.write((byte[]) mAbnormalPoint.get(k));
-                                            }
-                                            fos.write(0x00);
-                                            fos.close();
-
-
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                            try {
-                                                fos.close();
-                                            } catch (IOException e1) {
-                                                e1.printStackTrace();
-                                            }
-                                        }
-
-                                    }
-                                }
-
-                                Toast.makeText(getContext(), "功率谱文件写入完毕", Toast.LENGTH_SHORT).show();
-                            }
-                        } catch (Exception e) {
-
-                        } finally {
-                            lock.unlock();
-                        }
 
                     }
                 }).start();
@@ -322,7 +190,7 @@ public class Share_fragment extends Fragment {
                                     fos = new FileOutputStream(file);
                                     fos.write((byte) 0x00);
                                     for (int j = 0; j < mIQ.size(); j++) {
-                                        fos.write((byte[]) mPowerSpectrum.get(j));
+//                                        fos.write((byte[]) mPowerSpectrum.get(j));
                                     }
                                     fos.write(0x00);
                                     fos.close();
@@ -337,8 +205,6 @@ public class Share_fragment extends Fragment {
                             }
 
                             Toast.makeText(getContext(), "IQ文件写入完毕", Toast.LENGTH_SHORT).show();
-
-
                         }
 
                     }
