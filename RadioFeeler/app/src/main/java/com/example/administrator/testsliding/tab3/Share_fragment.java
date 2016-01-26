@@ -1,5 +1,7 @@
 package com.example.administrator.testsliding.tab3;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -15,7 +17,9 @@ import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.example.administrator.testsliding.Bean.ToServerPowerSpectrumAndAbnormalPoint;
+import com.example.administrator.testsliding.Database.DatabaseHelper;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.GlobalConstants.MyApplication;
 import com.example.administrator.testsliding.R;
 
 import java.io.DataInputStream;
@@ -32,6 +36,10 @@ import java.util.List;
  * Created by Administrator on 2015/7/21.
  */
 public class Share_fragment extends Fragment {
+
+    private MyApplication myApplication;
+    private SQLiteDatabase db=null;
+    private DatabaseHelper dbHelper=null;
     private Button mUpload;
     private Button mDownload;
     private Button mCreateIQ;
@@ -43,6 +51,7 @@ public class Share_fragment extends Fragment {
 
     FileInputStream fis;
     DataInputStream dis;
+
 
     public static final String PSFILE_PATH = Environment.getExternalStorageDirectory().
             getAbsolutePath() + "/PowerSpectrumFile/";
@@ -67,6 +76,9 @@ public class Share_fragment extends Fragment {
     }
 
     private void InitSetting() {
+        myApplication= (MyApplication) getActivity().getApplication();
+        dbHelper=new DatabaseHelper(getActivity());
+        db=dbHelper.getReadableDatabase();
         mUpload = (Button) getActivity().findViewById(R.id.upload);
         mDownload = (Button) getActivity().findViewById(R.id.download);
         mCreateIQ = (Button) getActivity().findViewById(R.id.iq_localsave);
@@ -83,56 +95,159 @@ public class Share_fragment extends Fragment {
                 mSeekbar.setVisibility(View.VISIBLE);
                 mSeekbar.setMax(10);
                 new Thread(new Runnable() {
-                    int uploadFileCount;
                     @Override
                     public void run() {
+                        int uploadFileCountPercent = 0;//它的取值区间是1到10
                         Looper.prepare();
                         ArrayList fileName = GetFileName(PSFILE_PATH);
-                        for (int i = 0; i < fileName.size(); i++) {
-                            //上传文件达到十分之一时候更新进度条
-                            if (i % (fileName.size()) / 10 == 0) {
-                                uploadFileCount++;
-                                handler.obtainMessage(1, uploadFileCount).sendToTarget();
-                            }
-                            //上传文件
-                            File file = new File(PSFILE_PATH,
-                                    String.valueOf(fileName.get(i)));
-                            try {
-                                fis = new FileInputStream(file);
-                                dis = new DataInputStream(fis);
-                                byte[] content = new byte[fis.available()];
-                                byte[] buffer = new byte[content.length];
-                                while ((fis.read(buffer)) != -1) {
-                                    content = buffer;
+                        if(myApplication.getFileUploadMode()==1){
+                            for (int i = 0; i < fileName.size(); i++) {
+                                //上传文件达到十分之一时候更新进度条
+                                if (i % (fileName.size()) / 10 == 0) {
+                                    uploadFileCountPercent++;
+                                    handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
                                 }
-                                //将文件里的内容转化为对象
-                                ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
-                                ToPS.setContent(content);
-                                ToPS.setContentLength(content.length);
-                                ToPS.setFileName(String.valueOf(fileName.get(i)));
-                                ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
-                                //将功率谱对象用服务器的session发出去
-                                Constants.SERVERsession.write(ToPS);
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                Looper.loop();// 进入loop中的循环，查看消息队列
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                Looper.loop();// 进入loop中的循环，查看消息队列
-                            }finally {
+                                //上传文件
+                                File file = new File(PSFILE_PATH,
+                                        String.valueOf(fileName.get(i)));
                                 try {
-                                    fis.close();
-                                    dis.close();
+                                    fis = new FileInputStream(file);
+                                    dis = new DataInputStream(fis);
+                                    byte[] content = new byte[fis.available()];
+                                    byte[] buffer = new byte[content.length];
+                                    while ((fis.read(buffer)) != -1) {
+                                        content = buffer;
+                                    }
+                                    //将文件里的内容转化为对象
+                                    ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                    ToPS.setContent(content);
+                                    ToPS.setContentLength(content.length);
+                                    ToPS.setFileName(String.valueOf(fileName.get(i)));
+                                    ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                    //将功率谱对象用服务器的session发出去
+                                    Constants.SERVERsession.write(ToPS);
+                                } catch (FileNotFoundException e) {
+                                    e.printStackTrace();
                                 } catch (IOException e) {
                                     e.printStackTrace();
+                                    Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                    Looper.loop();// 进入loop中的循环，查看消息队列
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                    Looper.loop();// 进入loop中的循环，查看消息队列
+                                }finally {
+                                    try {
+                                        fis.close();
+                                        dis.close();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+
+                        }else if(myApplication.getFileUploadMode()==2) {
+                            //自动门限上传
+                            Cursor c = db.rawQuery("SELECT filename from localFile  where isChanged=1", null);
+//                            Cursor c = db.query("loaclFile",null,null,null,null,null,null);//查询并获得游标
+                            if (c.moveToFirst()) {//判断游标是否为空
+                                for (int i = 0; i < c.getCount(); i++) {
+                                    c.move(i);//移动到指定记录
+                                    String name = c.getString(c.getColumnIndex("fileName"));
+                                    //上传文件
+                                    File file = new File(PSFILE_PATH, name);
+                                    try {
+                                        fis = new FileInputStream(file);
+                                        dis = new DataInputStream(fis);
+                                        byte[] content = new byte[fis.available()];
+                                        byte[] buffer = new byte[content.length];
+                                        while ((fis.read(buffer)) != -1) {
+                                            content = buffer;
+                                        }
+                                        //将文件里的内容转化为对象
+                                        ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                        ToPS.setContent(content);
+                                        ToPS.setContentLength(content.length);
+                                        ToPS.setFileName(String.valueOf(fileName.get(i)));
+                                        ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                        //将功率谱对象用服务器的session发出去
+                                        Constants.SERVERsession.write(ToPS);
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                        Looper.loop();// 进入loop中的循环，查看消息队列
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                        Looper.loop();// 进入loop中的循环，查看消息队列
+                                    }finally {
+                                        try {
+                                            fis.close();
+                                            dis.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+
+                                }
+
+
+                            } else if (myApplication.getFileUploadMode() == 3) {
+                                //抽取上传
+                                int pace = myApplication.getUpRate() - 1;
+                                for (int i = 0; i < fileName.size(); i += pace) {
+                                    //上传文件达到十分之一时候更新进度条
+
+                                    if (i % (fileName.size()) / 10 == 0) {
+                                        uploadFileCountPercent++;
+                                        handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
+                                    }
+                                    //上传文件
+                                    File file = new File(PSFILE_PATH,
+                                            String.valueOf(fileName.get(i)));
+                                    try {
+                                        fis = new FileInputStream(file);
+                                        dis = new DataInputStream(fis);
+                                        byte[] content = new byte[fis.available()];
+                                        byte[] buffer = new byte[content.length];
+                                        while ((fis.read(buffer)) != -1) {
+                                            content = buffer;
+                                        }
+                                        //将文件里的内容转化为对象
+                                        ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                        ToPS.setContent(content);
+                                        ToPS.setContentLength(content.length);
+                                        ToPS.setFileName(String.valueOf(fileName.get(i)));
+                                        ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                        //将功率谱对象用服务器的session发出去
+                                        Constants.SERVERsession.write(ToPS);
+                                    } catch (FileNotFoundException e) {
+                                        e.printStackTrace();
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                        Looper.loop();// 进入loop中的循环，查看消息队列
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                        Looper.loop();// 进入loop中的循环，查看消息队列
+                                    } finally {
+                                        try {
+                                            fis.close();
+                                            dis.close();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
                                 }
                             }
                         }
+
                         Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
+                        Looper.loop();
                     }
                 }).start();
             }
@@ -147,6 +262,10 @@ public class Share_fragment extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        int a=1;
+                        int b=1;
+                        int c=a+b;
+
 
                     }
                 }).start();

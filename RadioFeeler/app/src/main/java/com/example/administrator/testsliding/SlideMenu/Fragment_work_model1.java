@@ -29,6 +29,7 @@ import com.example.administrator.testsliding.Bean.SweepRange;
 import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.GlobalConstants.MyApplication;
 import com.example.administrator.testsliding.GlobalConstants.SweepRangeInfo;
 import com.example.administrator.testsliding.R;
 
@@ -38,6 +39,7 @@ import java.util.List;
 
 public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheckedChangeListener,
         SeekBar.OnSeekBarChangeListener {
+    private MyApplication myApplication;
 
     //文件上传模式按钮
     private RadioGroup rg_sendMode;
@@ -50,8 +52,8 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
     private SeekBar seekBar_select;
     private TextView tv_select;
 
-    private Button mSetButton;
-    private Button mGetButton;
+    private Button mStartSweepButton;
+    private Button mGetSweepInfo;
     private Button mFailed;
     private byte[] ReceivedWrong=new byte[17];
     private ReceiveWrong mReceiveWrong=new ReceiveWrong();
@@ -145,7 +147,7 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
 
 
     private int SweepMode;//扫频模式
-    private int uploadMode;//功率谱上传模式
+    private int uploadMode=1;//功率谱上传模式
     private int TotalOfBands;//多频段扫频模式的频段总数
     private int BandNumber;//多频段扫频模式的频段序号
     private int startFrequence;//起止频率
@@ -189,6 +191,8 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
      */
     private void InitSetting() {
 
+        myApplication= (MyApplication) getActivity().getApplication();
+
         gate=3;
         rg_sendMode = (RadioGroup) getActivity().findViewById(R.id.rg_sendMode);
         rg_sweep = (RadioGroup) getActivity().findViewById(R.id.rg_sweep);
@@ -197,9 +201,9 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
         seekBar_select = (SeekBar) getActivity().findViewById(R.id.seekBar_selectSend);
         tv_select = (TextView) getActivity().findViewById(R.id.tv_selectSend);
 
-        mSetButton = (Button) getActivity().findViewById(R.id.bt_setoutgain);
-        mGetButton = (Button) getActivity().findViewById(R.id.bt_getoutgain);
-        mFailed = (Button) getActivity().findViewById(R.id.bt_failed);
+        mStartSweepButton = (Button) getActivity().findViewById(R.id.bt_startSweep);
+        mGetSweepInfo = (Button) getActivity().findViewById(R.id.bt_getSweepInfo);
+
         ReceivedWrong[0]= (byte) 0x55;
         ReceivedWrong[1]= (byte) 0xf0;
         ReceivedWrong[2]= (byte) 0x0f;
@@ -246,12 +250,7 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
 //        sp_autoSend.setOnItemSelectedListener(this);//spinner监听在fragment中失效
         seekBar_select.setOnSeekBarChangeListener(this);
 
-        mFailed.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Constants.FPGAsession.write(mReceiveWrong);//下发重传帧
-            }
-        });
+
 
         sp_autoSend.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -274,29 +273,17 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
             }
         });
 
-        /**
-         * 生成数据帧
-         *
-         */
-
-
-//        for(int i=0;i<5;i++)
-//        {
-//         if((v1[i])!=0)
-//         {
-//             TotalOfBands++;
-//         }
-//        }
-
 
         final SweepRange sweepRange =new SweepRange();
-        mSetButton.setOnClickListener(new View.OnClickListener() {
+
+        mStartSweepButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
-
-
-
+                myApplication.setSweepStart((int) zhidingStart);
+                myApplication.setSweepEnd((int) zhidingEnd);
+                myApplication.setFileUploadMode(uploadMode);
+                myApplication.setUpRate(Select);
                 SweepRangeInfo sweepRangeInfo=new SweepRangeInfo();
                 TotalOfBands = 0;
                 if(IsQUANSetting0K){
@@ -390,7 +377,7 @@ public class Fragment_work_model1 extends Fragment implements RadioGroup.OnCheck
 
         });
 
-        mGetButton.setOnClickListener(new View.OnClickListener() {
+        mGetSweepInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Query query=new Query();

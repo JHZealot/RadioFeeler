@@ -2,9 +2,11 @@ package com.example.administrator.testsliding.Mina;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Environment;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -28,9 +30,10 @@ import com.example.administrator.testsliding.Bean.SweepRange;
 import com.example.administrator.testsliding.Bean.Threshold;
 import com.example.administrator.testsliding.Bean.UploadData;
 import com.example.administrator.testsliding.Broadcast.Broadcast;
+import com.example.administrator.testsliding.Database.DatabaseHelper;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
-import com.example.administrator.testsliding.GlobalConstants.MyApplicaton;
+import com.example.administrator.testsliding.GlobalConstants.MyApplication;
 import com.example.administrator.testsliding.compute.ComputePara;
 
 import org.apache.mina.core.future.ConnectFuture;
@@ -56,8 +59,10 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class MinaClientService extends Service {
 
+    private SQLiteDatabase db=null;
+    private DatabaseHelper dbHelper=null;
     private IoSession session;
-    private MyApplicaton mapp;
+    private MyApplication myApplication;
     ComputePara computePara = new ComputePara();
     private Boolean Ispsfull = false;//queshao
 
@@ -68,10 +73,10 @@ public class MinaClientService extends Service {
     private int h;
     private int y;
     private int z;
+    private int fileIsChanged;
 
     public static final String PSFILE_PATH = Environment.getExternalStorageDirectory().
             getAbsolutePath() + "/PowerSpectrumFile/";
-
 
 
     private FileOutputStream fos;
@@ -453,9 +458,11 @@ public class MinaClientService extends Service {
 
     @Override
     public void onCreate() {
+        dbHelper=new DatabaseHelper(this);
+        db=dbHelper.getWritableDatabase();
         Constants.sevCount++;
         Log.d("service", "service运行次数" + Constants.sevCount);
-        mapp= (MyApplicaton) getApplication();
+        myApplication = (MyApplication) getApplication();
         IntentFilter filter = new IntentFilter();
         filter.addAction(ConstantValues.InGainSet);
         filter.addAction(ConstantValues.InGainQuery);
@@ -575,10 +582,10 @@ public class MinaClientService extends Service {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-
+                            //相对于前一帧功率谱文件是否有变化信息位
                             List<byte[]> temp_powerSpectrum = new ArrayList<>();
                             List<byte[]> temp_abnormalPoint = new ArrayList<>();
-                            List<float[]> temp_drawSpectrum=new ArrayList<float[]>();
+                            List<float[]> temp_drawSpectrum = new ArrayList<float[]>();
                             byte[] b3 = null;
                             total = PSAP.getTotalBand();
                             int firstart = Constants.SweepParaList.get(0).getStartNum();//输入扫频范围第一组的起点对应的段号
@@ -586,12 +593,17 @@ public class MinaClientService extends Service {
                             if (PSAP.getFunctionID() == 0x0D) {//区分功率谱数据类型
                                 //判断是否为起始段
                                 if (firstart == PSAP.getPSbandNum()) {
+                                    //判断相对前一帧是否有变化
+                                    if (PSAP.getIsChange() == 0x0f) {
+                                        fileIsChanged = 1;
+                                    }
                                     if (Constants.spectrumCount != 0) {
 //                                        temp_powerSpectrum.clear();
 //                                        temp_abnormalPoint.clear();
                                         Constants.spectrumCount = 0;
-
+                                        fileIsChanged = 0;
                                     }
+
                                     Constants.spectrumCount++;
 
                                     //频谱数据
@@ -622,9 +634,7 @@ public class MinaClientService extends Service {
                                     System.arraycopy(f1, 0, pow, 2, 1024);//填入功率谱值
                                     temp_drawSpectrum.add(pow);
 
-                                }
-
-                                if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() == PSAP.getPSbandNum()) {
+                                } else if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() == PSAP.getPSbandNum()) {
 //                            //结束
                                     if (Constants.SweepParaList.get(SweepParaList_length - 1).getEndNum() !=
                                             Constants.SweepParaList.get(0).getStartNum()) {
@@ -650,6 +660,12 @@ public class MinaClientService extends Service {
                                         temp_drawSpectrum.add(f1);
                                     }
                                     if (Constants.spectrumCount == PSAP.getTotalBand()) {
+
+                                        //判断相对前一帧是否有变化
+                                        if (PSAP.getIsChange() == 0x0f) {
+                                            fileIsChanged = 1;
+                                        }
+
                                         File PSdir = new File(PSFILE_PATH);
                                         if (!PSdir.exists()) {
                                             PSdir.mkdir();
@@ -669,7 +685,7 @@ public class MinaClientService extends Service {
                                          */
 
                                         String name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day, hour, min, sec,
-                                               0 , Constants.ID, "fine", "pwr");
+                                                0, Constants.ID, "fine", "pwr");
 
                                         //判断是否是一秒内的文件，如果是，需要加上1s序号
                                         File[] PSFile = PSdir.listFiles();
@@ -686,34 +702,41 @@ public class MinaClientService extends Service {
 
                                         File file = new File(PSdir, name);
 //
-                                            //获取文件写入流
-                                            try{
-                                                dos=new DataOutputStream(new FileOutputStream(file));
+                                        //获取文件写入流
+                                        try {
+                                            dos = new DataOutputStream(new FileOutputStream(file));
 //                                                fos = new FileOutputStream(file);
-                                                dos.write((byte) 0x00);
-                                                for (int j = 0; j < temp_powerSpectrum.size(); j++) {
-                                                    dos.write(temp_powerSpectrum.get(j));
-                                                }
-                                                dos.write(0xff);
-                                                for (int k = 0; k < temp_abnormalPoint.size(); k++) {
-                                                    dos.write(temp_abnormalPoint.get(k));
-                                                }
-                                                dos.write(0x00);
-                                                dos.close();
-                                                y++;
-                                                Log.d("abcde","写文件个数："+y);
-
-                                            }catch (Exception e){
-                                                e.printStackTrace();
-                                            }finally {
-                                                try {
-                                                    dos.close();
-                                                } catch (IOException e) {
-                                                    e.printStackTrace();
-                                                }
+                                            dos.write((byte) 0x00);
+                                            for (int j = 0; j < temp_powerSpectrum.size(); j++) {
+                                                dos.write(temp_powerSpectrum.get(j));
                                             }
-                                    }
+                                            dos.write(0xff);
+                                            for (int k = 0; k < temp_abnormalPoint.size(); k++) {
+                                                dos.write(temp_abnormalPoint.get(k));
+                                            }
+                                            dos.write(0x00);
+                                            dos.close();
+                                            y++;
+                                            Log.d("abcde", "写文件个数：" + y);
 
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        } finally {
+                                            try {
+                                                dos.close();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
+                                        //在此将文件的信息插入数据库===================
+                                        ContentValues cv=new ContentValues();
+                                        cv.put("filename",name);
+                                        cv.put("start",myApplication.getSweepStart());
+                                        cv.put("end",myApplication.getSweepEnd());
+                                        cv.put("isChanged",fileIsChanged);
+                                        db.insert("localFile",null,cv);
+                                    }
                                     Lock lock = new ReentrantLock(); //锁对象
                                     lock.lock();
                                     try {
@@ -725,9 +748,17 @@ public class MinaClientService extends Service {
                                     }
                                     Constants.spectrumCount = 0;
 
+
+                                    //一个文件写完后将其重置
+                                    fileIsChanged = 0;
+
                                 } else {
                                     //中间正常
                                     Constants.spectrumCount++;
+                                    //判断相对前一帧是否有变化
+                                    if (PSAP.getIsChange() == 0x0f) {
+                                        fileIsChanged = 1;
+                                    }
                                     byte[] byte3 = new byte[1537];
                                     byte3[0] = (byte) PSAP.getPSbandNum();
                                     b3 = PSAP.getPSpower();
@@ -758,7 +789,7 @@ public class MinaClientService extends Service {
                                 Lock lock = new ReentrantLock(); //锁对象
                                 lock.lock();
                                 try {
-                                   // Constants.Queue_DrawRealtimeSpectrum.offer(pow);
+                                    // Constants.Queue_DrawRealtimeSpectrum.offer(pow);
                                 } catch (Exception e) {
 
                                 } finally {
@@ -852,7 +883,6 @@ public class MinaClientService extends Service {
                 Broadcast.sendBroadCast(getBaseContext(), ConstantValues.ConnectPCBQuery, "data", data);
 
             }
-
 
 
 //============================IQ波形文件生成==================================================
