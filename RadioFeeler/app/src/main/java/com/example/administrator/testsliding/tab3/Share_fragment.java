@@ -1,5 +1,6 @@
 package com.example.administrator.testsliding.tab3;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
@@ -38,8 +39,8 @@ import java.util.List;
 public class Share_fragment extends Fragment {
 
     private MyApplication myApplication;
-    private SQLiteDatabase db=null;
-    private DatabaseHelper dbHelper=null;
+    private SQLiteDatabase db = null;
+    private DatabaseHelper dbHelper = null;
     private Button mUpload;
     private Button mDownload;
     private Button mCreateIQ;
@@ -76,9 +77,9 @@ public class Share_fragment extends Fragment {
     }
 
     private void InitSetting() {
-        myApplication= (MyApplication) getActivity().getApplication();
-        dbHelper=new DatabaseHelper(getActivity());
-        db=dbHelper.getReadableDatabase();
+        myApplication = (MyApplication) getActivity().getApplication();
+        dbHelper = new DatabaseHelper(getActivity());
+        db = dbHelper.getReadableDatabase();
         mUpload = (Button) getActivity().findViewById(R.id.upload);
         mDownload = (Button) getActivity().findViewById(R.id.download);
         mCreateIQ = (Button) getActivity().findViewById(R.id.iq_localsave);
@@ -99,17 +100,23 @@ public class Share_fragment extends Fragment {
                     public void run() {
                         int uploadFileCountPercent = 0;//它的取值区间是1到10
                         Looper.prepare();
-                        ArrayList fileName = GetFileName(PSFILE_PATH);
-                        if(myApplication.getFileUploadMode()==1){
-                            for (int i = 0; i < fileName.size(); i++) {
+
+
+//                        ArrayList fileName = GetFileName(PSFILE_PATH);
+                        if (myApplication.getFileUploadMode() == 1) {
+                            Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
+                            while(c.moveToNext()){
+                                int i=0,fileNum=0;
+                                i++;
+                                fileNum=c.getCount();
                                 //上传文件达到十分之一时候更新进度条
-                                if (i % (fileName.size()) / 10 == 0) {
+                                if (i % (fileNum/10) == 0) {
                                     uploadFileCountPercent++;
                                     handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
                                 }
                                 //上传文件
-                                File file = new File(PSFILE_PATH,
-                                        String.valueOf(fileName.get(i)));
+                                String name=c.getString(c.getColumnIndex("fileName"));
+                                File file = new File(PSFILE_PATH,name);
                                 try {
                                     fis = new FileInputStream(file);
                                     dis = new DataInputStream(fis);
@@ -122,10 +129,14 @@ public class Share_fragment extends Fragment {
                                     ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
                                     ToPS.setContent(content);
                                     ToPS.setContentLength(content.length);
-                                    ToPS.setFileName(String.valueOf(fileName.get(i)));
-                                    ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                    ToPS.setFileName(name);
+                                    ToPS.setFileNameLength((short)name.getBytes(Charset.forName("UTF-8")).length);
                                     //将功率谱对象用服务器的session发出去
                                     Constants.SERVERsession.write(ToPS);
+                                    //在这里更新数据库，将文件是否上传的标志位置为1
+                                    ContentValues cvUpload=new ContentValues();
+                                    cvUpload.put("upload",1);
+                                    db.update("localFile",cvUpload,"filename=?",new String[]{name});
                                 } catch (FileNotFoundException e) {
                                     e.printStackTrace();
                                 } catch (IOException e) {
@@ -136,23 +147,23 @@ public class Share_fragment extends Fragment {
                                     e.printStackTrace();
                                     Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
                                     Looper.loop();// 进入loop中的循环，查看消息队列
-                                }finally {
+                                } finally {
                                     try {
                                         fis.close();
                                         dis.close();
+                                        c.close();
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                     }
                                 }
+
                             }
 
-                        }else if(myApplication.getFileUploadMode()==2) {
+                        } else if (myApplication.getFileUploadMode() == 2) {
                             //自动门限上传
-                            Cursor c = db.rawQuery("SELECT filename from localFile  where isChanged=1", null);
+                            Cursor c = db.rawQuery("SELECT filename from localFile  where isChanged=1 AND upload=0", null);
 //                            Cursor c = db.query("loaclFile",null,null,null,null,null,null);//查询并获得游标
-                            if (c.moveToFirst()) {//判断游标是否为空
-                                for (int i = 0; i < c.getCount(); i++) {
-                                    c.move(i);//移动到指定记录
+                            while (c.moveToNext()) {//判断游标是否为空
                                     String name = c.getString(c.getColumnIndex("fileName"));
                                     //上传文件
                                     File file = new File(PSFILE_PATH, name);
@@ -168,10 +179,14 @@ public class Share_fragment extends Fragment {
                                         ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
                                         ToPS.setContent(content);
                                         ToPS.setContentLength(content.length);
-                                        ToPS.setFileName(String.valueOf(fileName.get(i)));
-                                        ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                        ToPS.setFileName(name);
+                                        ToPS.setFileNameLength((short)name.getBytes(Charset.forName("UTF-8")).length);
                                         //将功率谱对象用服务器的session发出去
                                         Constants.SERVERsession.write(ToPS);
+                                        //在这里更新数据库，将文件是否上传的标志位置为1
+                                        ContentValues cvUpload=new ContentValues();
+                                        cvUpload.put("upload",1);
+                                        db.update("localFile",cvUpload,"filename=?",new String[]{name});
                                     } catch (FileNotFoundException e) {
                                         e.printStackTrace();
                                     } catch (IOException e) {
@@ -182,32 +197,30 @@ public class Share_fragment extends Fragment {
                                         e.printStackTrace();
                                         Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
                                         Looper.loop();// 进入loop中的循环，查看消息队列
-                                    }finally {
+                                    } finally {
                                         try {
                                             fis.close();
                                             dis.close();
+                                            c.close();
                                         } catch (IOException e) {
                                             e.printStackTrace();
                                         }
                                     }
+                            }
 
 
-                                }
+                        } else if (myApplication.getFileUploadMode() == 3) {
+                            //抽取上传
+                            int pace = myApplication.getUpRate() ;
+                            Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
+                            int i=0;
+                            int fileNum=c.getCount();
+                            while(c.moveToNext()){
+                                if(i%pace==0){
 
-
-                            } else if (myApplication.getFileUploadMode() == 3) {
-                                //抽取上传
-                                int pace = myApplication.getUpRate() - 1;
-                                for (int i = 0; i < fileName.size(); i += pace) {
-                                    //上传文件达到十分之一时候更新进度条
-
-                                    if (i % (fileName.size()) / 10 == 0) {
-                                        uploadFileCountPercent++;
-                                        handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
-                                    }
+                                    String name = c.getString(c.getColumnIndex("fileName"));
                                     //上传文件
-                                    File file = new File(PSFILE_PATH,
-                                            String.valueOf(fileName.get(i)));
+                                    File file = new File(PSFILE_PATH,name);
                                     try {
                                         fis = new FileInputStream(file);
                                         dis = new DataInputStream(fis);
@@ -220,10 +233,14 @@ public class Share_fragment extends Fragment {
                                         ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
                                         ToPS.setContent(content);
                                         ToPS.setContentLength(content.length);
-                                        ToPS.setFileName(String.valueOf(fileName.get(i)));
-                                        ToPS.setFileNameLength((short) String.valueOf(fileName.get(i)).getBytes(Charset.forName("UTF-8")).length);
+                                        ToPS.setFileName(name);
+                                        ToPS.setFileNameLength((short) name.getBytes(Charset.forName("UTF-8")).length);
                                         //将功率谱对象用服务器的session发出去
                                         Constants.SERVERsession.write(ToPS);
+                                        //在这里更新数据库，将文件是否上传的标志位置为1
+                                        ContentValues cvUpload=new ContentValues();
+                                        cvUpload.put("upload",1);
+                                        db.update("localFile",cvUpload,"filename=?",new String[]{name});
                                     } catch (FileNotFoundException e) {
                                         e.printStackTrace();
                                     } catch (IOException e) {
@@ -242,10 +259,18 @@ public class Share_fragment extends Fragment {
                                             e.printStackTrace();
                                         }
                                     }
-                                }
-                            }
-                        }
 
+                                }
+                                i++;
+                                //上传文件达到十分之一时候更新进度条
+                                if (i % (fileNum/ 10) == 0) {
+                                    uploadFileCountPercent++;
+                                    handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
+                                }
+
+                            }
+
+                        }
                         Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
                         Looper.loop();
                     }
@@ -262,9 +287,9 @@ public class Share_fragment extends Fragment {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
-                        int a=1;
-                        int b=1;
-                        int c=a+b;
+                        int a = 1;
+                        int b = 1;
+                        int c = a + b;
 
 
                     }

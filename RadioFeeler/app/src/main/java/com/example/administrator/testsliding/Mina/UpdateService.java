@@ -187,7 +187,7 @@ public class UpdateService extends Service {
                     connector.setHandler(dataHandler);
                     // 这里是异步操作 连接后立即返回"
 			ConnectFuture future = connector.connect(new InetSocketAddress(
-						"27.17.8.142",8888));
+						"27.17.8.142",9988));
 //                    ConnectFuture future = connector.connect(new InetSocketAddress(
 //                            Constant.IPValue, Constant.PORTValue));
                     future.awaitUninterruptibly();// 等待连接创建完成

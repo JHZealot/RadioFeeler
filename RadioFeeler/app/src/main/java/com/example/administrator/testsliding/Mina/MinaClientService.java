@@ -44,9 +44,11 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.ProtocolCodecFilter;
 import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
+import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -525,13 +527,24 @@ public class MinaClientService extends Service {
                     /**
                      * Fpga的IP
                      */
+
+                    ArrayList ipList=getConnectIp();
+                    String FpgaIP= (String) ipList.get(0);
                     ConnectFuture future = connector.connect
-                            (new InetSocketAddress("192.168.43.157", 8080));
+                            (new InetSocketAddress(FpgaIP, 8080));
                     /**
                      * Fpga的IP
                      */
 //                ConnectFuture future=connector.connect
-//                        (new InetSocketAddress(Constants.PCBIP,8080));
+//                        (new InetSocketAddress(Constants.PCBIP,8080)); /**
+
+
+
+                    /*
+                     ** Fpga的IP
+//                     */
+//                ConnectFuture future=connector.connect
+//                        (new InetSocketAddress("115.156.208.218",9988));
 
                     future.awaitUninterruptibly();// 等待连接创建完成
 
@@ -679,6 +692,7 @@ public class MinaClientService extends Service {
                                         int min = getMin(byte6);
                                         int sec = getSecond(byte6);
                                         //创建文件
+                                        int count = 0;
 
                                         /**
                                          * 获取文件名
@@ -691,8 +705,7 @@ public class MinaClientService extends Service {
                                         File[] PSFile = PSdir.listFiles();
                                         if (PSFile.length > 0) {
                                             for (int j = 0; j < PSFile.length; j++) {
-                                                if (name == PSFile[j].getName()) {
-                                                    int count = 0;
+                                                if (name.equals(PSFile[j].getName())) {
                                                     count++;
                                                     name = String.format("%d-%d-%d-%d-%d-%d-%d-%d-%s.%s", year, month, day,
                                                             hour, min, sec, count, Constants.ID, "fine", "pwr");
@@ -700,7 +713,9 @@ public class MinaClientService extends Service {
                                             }
                                         }
 
+
                                         File file = new File(PSdir, name);
+                                        count=0;
 //
                                         //获取文件写入流
                                         try {
@@ -735,6 +750,7 @@ public class MinaClientService extends Service {
                                         cv.put("start",myApplication.getSweepStart());
                                         cv.put("end",myApplication.getSweepEnd());
                                         cv.put("isChanged",fileIsChanged);
+                                        cv.put("upload",0);
                                         db.insert("localFile",null,cv);
                                     }
                                     Lock lock = new ReentrantLock(); //锁对象
@@ -1012,6 +1028,20 @@ public class MinaClientService extends Service {
             return null;
         }
 
+    }
+
+    private ArrayList<String> getConnectIp() throws Exception {
+        ArrayList<String> connectIpList = new ArrayList<String>();
+        BufferedReader br = new BufferedReader(new FileReader("/proc/net/arp"));
+        String line;
+        while ((line = br.readLine()) != null) {
+            String[] splitted = line.split(" +");
+            if (splitted != null && splitted.length >= 4) {
+                String ip = splitted[0];
+                connectIpList.add(ip);
+            }
+        }
+        return connectIpList;
     }
 
 }
