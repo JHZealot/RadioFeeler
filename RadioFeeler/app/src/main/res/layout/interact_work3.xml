@@ -61,7 +61,8 @@
 
         </LinearLayout>
 
-        <include layout="@layout/fragment_fragment_work_model3"/>
+        <include android:id="@+id/work3"
+            layout="@layout/fragment_fragment_work_model3"/>
 
     <!--</ScrollView>-->
 

@@ -2,6 +2,8 @@ package com.example.administrator.testsliding.GlobalConstants;
 
 import android.app.Application;
 
+import com.baidu.mapapi.SDKInitializer;
+
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -75,6 +77,10 @@ public class MyApplication extends Application{
     @Override
     public void onCreate() {
         super.onCreate();
-        setQueue_RealtimeSpectrum(new LinkedList<List<byte[]>>());
+        //setQueue_RealtimeSpectrum(new LinkedList<List<byte[]>>());
+
+        // 在使用 SDK 各组间之前初始化 context 信息，传入 ApplicationContext
+        SDKInitializer.initialize(this);
     }
+
 }

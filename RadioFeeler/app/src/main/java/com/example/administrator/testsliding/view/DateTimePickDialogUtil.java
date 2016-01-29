@@ -61,8 +61,7 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 					+ calendar.get(Calendar.MONTH) + "月"
 					+ calendar.get(Calendar.DAY_OF_MONTH) + "日 "
 					+ calendar.get(Calendar.HOUR_OF_DAY) + ":"
-					+ calendar.get(Calendar.MINUTE)+ ":"
-					+calendar.get(Calendar.SECOND);
+					+ calendar.get(Calendar.MINUTE);
 		//}
 
 		datePicker.init(calendar.get(Calendar.YEAR),
@@ -70,7 +69,6 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 				calendar.get(Calendar.DAY_OF_MONTH), this);
 		timePicker.setCurrentHour(calendar.get(Calendar.HOUR_OF_DAY));
 		timePicker.setCurrentMinute(calendar.get(Calendar.MINUTE));
-		timePicker.setCurrentMinute(calendar.get(Calendar.SECOND));
 	}
 
 	/**
@@ -119,7 +117,7 @@ public class DateTimePickDialogUtil implements OnDateChangedListener,
 		calendar.set(datePicker.getYear(), datePicker.getMonth(),
 				datePicker.getDayOfMonth(), timePicker.getCurrentHour(),
 				timePicker.getCurrentMinute());
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
 
 		dateTime = sdf.format(calendar.getTime());
 		ad.setTitle(dateTime);

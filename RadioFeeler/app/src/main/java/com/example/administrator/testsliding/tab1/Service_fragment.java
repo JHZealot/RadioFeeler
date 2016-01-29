@@ -12,7 +12,6 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.SimpleAdapter;
 
-import com.example.administrator.testsliding.Map_BaseMap;
 import com.example.administrator.testsliding.R;
 import com.gc.flashview.FlashView;
 import com.gc.flashview.constants.EffectConstants;
@@ -36,9 +35,10 @@ public class Service_fragment extends Fragment implements
     private List<Map<String,Object>> dataList;
 
     private int[] icon={R.drawable.ditu2,R.drawable.location,
-            R.drawable.gongzuomoshi2,R.drawable.pinpu2,R.drawable.iq,R.drawable.jiaohu};
-    private String[] iconName={"电磁辐射态势图","异常频点定位","台站状态","无线电规划","历史IQ波",
-    "站点互动"};
+            R.drawable.gongzuomoshi2,R.drawable.pinpu2,R.drawable.yingyong,R.drawable.iq,
+            R.drawable.jiaohu,R.drawable.xiuzhengbiao};
+    private String[] iconName={"电磁辐射态势图","异常频点定位","台站状态","无线电规划","终端属性","历史IQ波",
+    "远程监控","终端修正表"};
     private SimpleAdapter adapter;
 
 
@@ -107,7 +107,7 @@ public class Service_fragment extends Fragment implements
         switch(position){
 
             case 0:
-                Intent intent0=new Intent(getActivity(),Map_BaseMap.class);
+                Intent intent0=new Intent(getActivity(),Service_map.class);
                 startActivity(intent0);
                 break;
             case 1:
@@ -118,18 +118,31 @@ public class Service_fragment extends Fragment implements
                 Intent intent2=new Intent(getActivity(),Service_stations.class);
                 startActivity(intent2);
                 break;
+
             case 3:
-                Intent intent3=new Intent(getActivity(),Service_radio.class);
-                startActivity(intent3);
-                break;
-            case 4:
-                Intent intent4=new Intent(getActivity(),Service_IQ.class);
+                Intent intent4=new Intent(getActivity(),Service_radio.class);
                 startActivity(intent4);
                 break;
-            case 5:
-//                Intent intent5=new Intent(getActivity(),Service_Interact.class);
-//                startActivity(intent5);
+            case 4:
+                Intent intent3=new Intent(getActivity(),Service_Terminal.class);
+                startActivity(intent3);
                 break;
+
+            case 5:
+                Intent intent5=new Intent(getActivity(),Service_IQ.class);
+                startActivity(intent5);
+                break;
+            case 6:
+                Intent intent6=new Intent(getActivity(),Service_Interact.class);
+                startActivity(intent6);
+                break;
+            case 7:
+                Intent intent7=new Intent(getActivity(),Service_ModifyChart.class);
+                startActivity(intent7);
+                break;
+
+
+
         }
     }
 }

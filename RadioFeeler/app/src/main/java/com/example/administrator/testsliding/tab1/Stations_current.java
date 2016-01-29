@@ -7,12 +7,19 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
+import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
-import com.example.administrator.testsliding.view.DateTimePickDialogUtil;
+import com.example.administrator.testsliding.bean2server.Station_CurrentRequst;
+import com.example.administrator.testsliding.compute.ComputePara;
+import com.example.administrator.testsliding.view.DateTimePickDialogUtil2Mius;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +27,7 @@ import java.util.List;
 /**
  * Created by Administrator on 2015/10/27.
  */
-public class Stations_current extends Fragment {
+public class Stations_current extends Fragment  {
 
     private EditText et_ID;
     private EditText et_frequecy;
@@ -30,8 +37,9 @@ public class Stations_current extends Fragment {
     private ArrayAdapter<String> adapter1, adapter2;
 
     private EditText et_IQblock,et_inputtime;
-
-
+    private ComputePara computePara =new ComputePara();
+    private byte locationWay=0;
+    private byte IQband_radio=0x11;//界面初始化对应
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -51,6 +59,7 @@ public class Stations_current extends Fragment {
 
         et_frequecy = (EditText) getActivity().findViewById(R.id.et_radioPoint);
         et_ID = (EditText) getActivity().findViewById(R.id.et_ID);
+
 
         spinner_location = (Spinner) getActivity().findViewById(R.id.spinner_location);
         spinner_IQ = (Spinner) getActivity().findViewById(R.id.spinner_IQ);
@@ -96,19 +105,97 @@ public class Stations_current extends Fragment {
     }
 
     private void InitEvent() {
-        getActivity().findViewById(R.id.btn_querycurrent).setOnClickListener(new View.OnClickListener() {
+        spinner_location.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getActivity(), Stations_currentResult.class);
-                startActivity(intent);
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch(position) {
+                    case 0:
+                        locationWay = 0x00;
+                        break;
+                    case 1:
+                        locationWay = 0x0F;
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
             }
         });
+        spinner_IQ.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                switch (position){
+                    case 0:
+                        IQband_radio=0x11;
+                        break;
+                    case 1:
+                        IQband_radio=0x22;
+                        break;
+                    case 2:
+                        IQband_radio=0x33;
+                        break;
+                    case 3:
+                        IQband_radio=0x44;
+                        break;
+                    case 4:
+                        IQband_radio=0x55;
+                        break;
+                }
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
         et_inputtime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                DateTimePickDialogUtil dateTimePicKDialog = new DateTimePickDialogUtil(getActivity());
+                DateTimePickDialogUtil2Mius dateTimePicKDialog = new DateTimePickDialogUtil2Mius(getActivity());
                 dateTimePicKDialog.dateTimePicKDialog(et_inputtime);
             }
         });
+
+        getActivity().findViewById(R.id.btn_querycurrent).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Station_CurrentRequst curretnt=new Station_CurrentRequst();
+                 try {
+                     curretnt.setEquiomentID(Constants.ID);
+                     if(!et_ID.getText().toString().equals("")) {
+                         curretnt.setIDcard(Integer.parseInt(et_ID.getText().toString()));
+                     }
+                     curretnt.setLocationWay(locationWay);
+
+                    if(!et_frequecy.getText().toString().equals("")) {
+                        curretnt.setAbFreq(Double.valueOf(et_frequecy.getText().toString()));
+                    }
+                     curretnt.setIQband_radio(IQband_radio);
+                     if(!et_IQblock.getText().toString().equals("")) {
+                         curretnt.setBlockNum(Integer.parseInt(et_IQblock.getText().toString()));
+                     }
+                     if(!et_inputtime.getText().toString().equals("")) {
+                         byte[] bytes = computePara.Time2Bytes(et_inputtime.getText().toString());
+                         curretnt.setTime2min(bytes);
+                     }
+
+                     Broadcast.sendBroadCast(getActivity(),
+                             ConstantValues.STATION_CURRENT, "station_current", curretnt);
+                     Intent intent = new Intent(getActivity(), Stations_currentResult.class);
+                     startActivity(intent);
+                 }catch (Exception e){
+                     Toast.makeText(getActivity(),"输入数据不能为空",Toast.LENGTH_SHORT).show();
+                 }
+
+            }
+        });
     }
+
+
+
 }

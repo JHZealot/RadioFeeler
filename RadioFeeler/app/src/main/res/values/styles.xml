@@ -34,6 +34,6 @@
     <!-- spinner -->
     <style name="spinner_style">
         <item name="android:paddingLeft">5dip</item>
-        <item name="android:textSize">8sp</item>
+        <item name="android:textSize">10sp</item>
     </style>
 </resources>

@@ -50,20 +50,20 @@ public class SettoFPGAPacket {
 		int endOffset=ComputeSegOffset(endFrequence);
 
 
-		sweep[0]= (byte) ((aSweepMode<<2)+aSendMode);     //扫频模式+长传模式
+		sweep[0]= (byte) (aSweepMode<<2+aSendMode);     //扫频模式+长传模式
 		sweep[1]= (byte) aTotalOfBands;//针对离散和多频段扫频的频段总数(N)
 		sweep[2]= (byte) aBandNumber;//频段序号(1~N)
 
 		sweep[3]=ComputeSegNumber(startFrequence);
 		//偏移量至多只占10bit，因此只取前两个字节即可
-		sweep[4]=(byte)( (startOffset >> 8) & 0xff); //偏移量高位，
+		sweep[4]=(byte) (startOffset >> 8 & 0xff); //偏移量高位，
 		sweep[5]=(byte) (startOffset & 0xff);//偏移量低8位
 
 		sweep[6]=ComputeSegNumber(endFrequence);
-		sweep[7]=(byte) ((endOffset >> 8) & 0xff); //偏移量高位，
+		sweep[7]=(byte) (endOffset >> 8 & 0xff); //偏移量高位，
 		sweep[8]=(byte) (endOffset & 0xff);//偏移量低8位
 
-		sweep[9]= (byte)((gate<<6)+aSelect);//判定门限+抽取倍率
+		sweep[9]= (byte) (gate<<6+aSelect);//判定门限+抽取倍率
 
 		return sweep;
 
@@ -108,24 +108,18 @@ public class SettoFPGAPacket {
 
 	public byte[] PressData(int number,double fix1,double fix2){
 		byte[] data=new byte[10];
-		byte[] data1;
-		byte[] data2;
+		byte[] data1=new byte[3];
+		byte[] data2=new byte[3];
 
 		data[0]= (byte) number;
 		if(fix1!=0){
 			data1=ComputeFloatTobyte(fix1);
-			data[1]=data1[0];
-			data[2]=data1[1];
-			data[3]=data1[2];
-//			System.arraycopy(data1, 0, data, 1, 3);
+			System.arraycopy(data1, 0, data, 1, 3);
 		}
 
 		if(fix2!=0){
 			data2=ComputeFloatTobyte(fix2);
-			data[4]=data2[0];
-			data[5]=data2[1];
-			data[6]=data2[2];
-//			System.arraycopy(data2, 0, data, 4, 3);
+			System.arraycopy(data2, 0, data, 4, 3);
 		}
 
 		return data;
@@ -168,10 +162,10 @@ public class SettoFPGAPacket {
 		para[1]= FixThresholdChangeToCode(threshold);//门限类型和自适应门限
 
 		//固定门限转换（固定门限的值不会有16bit）
-		if(fixThreshold>=0){
-			para[2] = (byte)( (thred>> 8) & 0xff);//固定门限高八位，最高位符号位为0
+		if(fixThreshold>0){
+			para[2] = (byte) (thred>> 8 & 0xff);//固定门限高八位，最高位符号位为0
 		}else {
-			para[2]= (byte) (128+((thred>> 8) & 0xff));//最高位符号位为1
+			para[2]= (byte) (128+(thred>> 8 & 0xff));//最高位符号位为1
 		}
 		para[3]= (byte) (thred & 0xff);
 		return para;
@@ -179,7 +173,7 @@ public class SettoFPGAPacket {
 	}
 	/**
 	 * 定频接收参数设置数据帧
-	 * @param IQ  IQ复信号带宽和数据率
+	 * @param index  IQ复信号带宽和数据率
 	 * @param blockNum
 	 * @param year
 	 * @param month
@@ -190,16 +184,14 @@ public class SettoFPGAPacket {
 	 * @return
 	 */
 
-	public byte[] FixrecvData(double IQ,int blockNum,
+	public byte[] FixrecvData(int index,int blockNum,
 							  int year,int month,int date,int hour,int minute,int miu){
 		byte[] data=new byte[10];
 		byte[] data1=new byte[8];
 
-		data[0]=IQtoCode(IQ);
+		data[0]=IQtoCode(index);
 		data[1]=(byte) blockNum;
 		data1=TimetoCode(year, month, date, hour, minute, miu);
-
-
 
 		System.arraycopy(data1, 0, data, 2, 8);
 		return data;
@@ -221,7 +213,7 @@ public class SettoFPGAPacket {
 		byte[] data=new byte[10];
 
 		data[0]= (byte) pressMode;
-		data[1]=(byte) ((style<<4)+band);//信号类型占高四位，信号带宽占低四位
+		data[1]=(byte) (style<<4+band);//信号类型占高四位，信号带宽占低四位
 		//四个时间的转换
 		data[2]=(byte) ((t1>>8)&0xff);
 		data[3]=(byte) (t1&0xff);
@@ -282,8 +274,8 @@ public class SettoFPGAPacket {
 		byte[] com=new byte[3];
 		int floatzhengshu=(int) frequency;
 		int floatxiaoshu=(int) ((frequency-floatzhengshu)*1024);
-		com[0]=(byte) ((floatzhengshu>>6)&0xff);//整数部分高8位（总共14bit）
-		com[1]=(byte) ((((floatxiaoshu>>8)&0x03)<<6)+(floatzhengshu&0x3f));
+		com[0]=(byte) (floatzhengshu>>6&0xff);//整数部分高8位（总共14bit）
+		com[1]=(byte) ((floatxiaoshu>>8&0x03)>>6+(floatzhengshu&0x3f));
 		com[2]=(byte) (floatxiaoshu&0xff);
 		return com;
 	}
@@ -325,22 +317,30 @@ public class SettoFPGAPacket {
 	}
 	/**
 	 * IQ复信号带宽和复信号数据率转换编码
-	 * @param IQ
+	 * @param index
 	 * @return
 	 */
 
-	private byte IQtoCode(double IQ){
+	private byte IQtoCode(int index){
 		byte code=0;
-		if(IQ==5){
-			code=0x11;
-		}else if(IQ==2.5){
-			code=0x22;
-		}else if(IQ==1){
-			code=0x33;
-		}else if(IQ==0.5){
-			code=0x44;
-		}else if(IQ==0.1){
-			code=0x55;
+		switch(index){
+			case 0:
+				code=0x11;
+				break;
+			case 1:
+				code=0x22;
+				break;
+			case 2:
+				code=0x33;
+				break;
+			case 3:
+				code=0x44;
+				break;
+			case 4:
+				code=0x55;
+				break;
+			default:
+				break;
 		}
 		return code;
 

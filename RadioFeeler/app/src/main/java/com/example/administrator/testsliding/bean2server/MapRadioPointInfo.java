@@ -1,9 +1,12 @@
 package com.example.administrator.testsliding.bean2server;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 /**
  * Created by Administrator on 2015/12/21.
  */
-public class MapRadioPointInfo {
+public class MapRadioPointInfo implements Parcelable {
     private int year;
     private int month;
     private int date;
@@ -18,6 +21,51 @@ public class MapRadioPointInfo {
 
     private float equalPower;//等效发射功率
     private float rPara;//损耗指数
+
+    public MapRadioPointInfo() {
+    }
+
+    public MapRadioPointInfo(int month, int year, int date, int hour, String longtitudeStyle, int min, float longitude, String latitudeStyle, float latitude, int height, float equalPower, float rPara) {
+        this.month = month;
+        this.year = year;
+        this.date = date;
+        this.hour = hour;
+        this.longtitudeStyle = longtitudeStyle;
+        this.min = min;
+        this.longitude = longitude;
+        this.latitudeStyle = latitudeStyle;
+        this.latitude = latitude;
+        this.height = height;
+        this.equalPower = equalPower;
+        this.rPara = rPara;
+    }
+
+    protected MapRadioPointInfo(Parcel in) {
+        year = in.readInt();
+        month = in.readInt();
+        date = in.readInt();
+        hour = in.readInt();
+        min = in.readInt();
+        longtitudeStyle = in.readString();
+        longitude = in.readFloat();
+        latitudeStyle = in.readString();
+        latitude = in.readFloat();
+        height = in.readInt();
+        equalPower = in.readFloat();
+        rPara = in.readFloat();
+    }
+
+    public static final Creator<MapRadioPointInfo> CREATOR = new Creator<MapRadioPointInfo>() {
+        @Override
+        public MapRadioPointInfo createFromParcel(Parcel in) {
+            return new MapRadioPointInfo(in);
+        }
+
+        @Override
+        public MapRadioPointInfo[] newArray(int size) {
+            return new MapRadioPointInfo[size];
+        }
+    };
 
     public int getYear() {
         return year;
@@ -115,5 +163,26 @@ public class MapRadioPointInfo {
 
     public void setrPara(float rPara) {
         this.rPara = rPara;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(year);
+        dest.writeInt(month);
+        dest.writeInt(date);
+        dest.writeInt(hour);
+        dest.writeInt(min);
+        dest.writeString(longtitudeStyle);
+        dest.writeFloat(longitude);
+        dest.writeString(latitudeStyle);
+        dest.writeFloat(latitude);
+        dest.writeInt(height);
+        dest.writeFloat(equalPower);
+        dest.writeFloat(rPara);
     }
 }

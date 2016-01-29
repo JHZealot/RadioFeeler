@@ -1,4 +1,4 @@
-package com.example.administrator.testsliding.Start;
+package com.example.administrator.testsliding.start;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -12,7 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.example.administrator.testsliding.MainActivity;
+import com.example.administrator.testsliding.Mina.MainActivity;
 import com.example.administrator.testsliding.R;
 
 

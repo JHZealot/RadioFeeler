@@ -5,10 +5,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
 
-import com.example.administrator.testsliding.Encode.Send_ServiceRadio;
+import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
-import com.example.administrator.testsliding.packet.RequestToServicePacket;
+import com.example.administrator.testsliding.bean2server.Send_ServiceRadio;
 import com.example.administrator.testsliding.view.MyTopBar;
 
 
@@ -18,6 +21,7 @@ import com.example.administrator.testsliding.view.MyTopBar;
 public class Service_radio extends Activity {
     private EditText et_start,et_end;
     private MyTopBar topBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,7 +39,7 @@ public class Service_radio extends Activity {
         topBar= (MyTopBar) findViewById(R.id.topbar_radio);
     }
 
-    private void InitEvent(){
+    private void InitEvent() {
         topBar.setOnTopBarClickListener(new MyTopBar.TopBarClickListener() {
             @Override
             public void leftclick() {
@@ -44,29 +48,49 @@ public class Service_radio extends Activity {
 
             @Override
             public void rightclick() {
-                Intent intent=new Intent(Service_radio.this,Service_radioResult.class);
+                Intent intent = new Intent(Service_radio.this, Service_radioResult.class);
                 startActivity(intent);
             }
         });
 
-        findViewById(R.id.btn_queryradio).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.btn_sendradio).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 //获取值并下发
-                GetValue();
-                Intent intent=new Intent(Service_radio.this,Service_radioResult.class);
-                startActivity(intent);
+                Send_ServiceRadio radio = new Send_ServiceRadio();
+                radio.setEquipmentID(Constants.ID);
+
+
+                if((et_start.getText().toString())!=null&&(et_end.getText().toString())!=null) {
+                    try {
+                        double  ss= Double.valueOf(et_start.getText().toString());
+                        double ss2 = Double.valueOf(et_end.getText().toString());
+                        if (ss<= ss2) {
+                            int start = (int) Math.floor(ss);
+                            int end = (int) Math.ceil(ss2);
+                            radio.setStartFrequency(start);
+                            radio.setEndFrequency(end);
+                            // 点击发送消息到服务器
+                            Broadcast.sendBroadCast(Service_radio.this,
+                                    ConstantValues.WIRLESSPLAN, "wirlessplan", radio);
+                            Intent intent = new Intent(Service_radio.this, Service_radioResult.class);
+                            startActivity(intent);
+                        }
+                        else {
+                            Toast.makeText(Service_radio.this, "输入数据有误!", Toast.LENGTH_SHORT).show();
+                        }
+
+                    }
+                    catch(Exception e){
+                        Toast.makeText(Service_radio.this,"输入数据不能为空!",Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+
             }
         });
     }
 
-    private void GetValue(){
-        Send_ServiceRadio radio=new Send_ServiceRadio();
-        RequestToServicePacket packet=new RequestToServicePacket();
-        radio.equipmentID=0;
-        radio.startFrequency=Integer.valueOf(et_start.getText().toString());
-        radio.endFrequency=Integer.valueOf(et_end.getText().toString());
-        packet.RequestWielessPlan(radio);
-    }
+
 }

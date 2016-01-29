@@ -1,7 +1,6 @@
 package com.example.administrator.testsliding.SlideMenu;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -13,9 +12,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.administrator.testsliding.Bean.Query;
-import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
 import com.example.administrator.testsliding.GlobalConstants.Constants;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.Mina.MinaClientService;
 import com.example.administrator.testsliding.R;
 
@@ -72,6 +71,7 @@ public class ConnectPCB extends Activity {
         filter.addAction(ConstantValues.ConnectPCBQuery);
         filter.addCategory(Intent.CATEGORY_DEFAULT);
         registerReceiver(ConnectPCBReceiver, filter);
+
         mIp = (TextView) findViewById(R.id.et_ID);
         initEvent();
     }
@@ -160,5 +160,11 @@ public class ConnectPCB extends Activity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        unregisterReceiver(ConnectPCBReceiver);
+        ConnectPCBReceiver = null;
+        super.onDestroy();
 
+    }
 }

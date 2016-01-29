@@ -53,9 +53,11 @@
     </LinearLayout>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
-        android:text="查看"
-        android:id="@+id/btn_queryradio"
+        android:text="发送"
+        android:id="@+id/btn_sendradio"
         android:layout_gravity="center_horizontal"/>
+
+
 </LinearLayout>

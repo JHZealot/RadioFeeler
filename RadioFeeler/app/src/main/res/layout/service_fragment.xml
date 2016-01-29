@@ -8,14 +8,14 @@
     android:id="@+id/flash"
     android:layout_width="match_parent"
     android:layout_height="0dp"
-    android:layout_weight="1">
+    android:layout_weight="2">
 </com.gc.flashview.FlashView>
 
     <GridView
         android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_weight="3"
         android:layout_gravity="center"
         android:numColumns="auto_fit"
         android:horizontalSpacing="1dp"

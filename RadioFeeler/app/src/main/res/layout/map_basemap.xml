@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".service.MainActivity">
 
     <com.baidu.mapapi.map.MapView
         android:id="@+id/bmapView"
@@ -40,5 +40,5 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="15sp"
-        android:text="辐射图"/>
+        android:text="态势图"/>
 </RelativeLayout>

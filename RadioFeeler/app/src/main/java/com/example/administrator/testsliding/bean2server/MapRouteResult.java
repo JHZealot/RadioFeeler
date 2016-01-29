@@ -17,9 +17,11 @@ public class MapRouteResult implements Parcelable{
 
     }
 
+
     protected MapRouteResult(Parcel in) {
         centralFreq = in.readInt();
         band = in.readInt();
+        mapRadioPointInfoList = in.createTypedArrayList(MapRadioPointInfo.CREATOR);
     }
 
     public static final Creator<MapRouteResult> CREATOR = new Creator<MapRouteResult>() {
@@ -61,6 +63,7 @@ public class MapRouteResult implements Parcelable{
         this.mapRadioPointInfoList = mapRadioPointInfoList;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -70,6 +73,6 @@ public class MapRouteResult implements Parcelable{
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(centralFreq);
         dest.writeInt(band);
-
+        dest.writeTypedList(mapRadioPointInfoList);
     }
 }

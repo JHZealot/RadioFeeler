@@ -45,6 +45,21 @@ public class ComputePara {
 
         return  bytes;
     }
+    public List<Integer> Time2Int(String str) {
+        int[] result = new int[8];
+        //从字符串中取出时间，分别是年，月，日，时，分,miao
+        String regex = "\\d*";
+        List<Integer> digitList = new ArrayList<>();
+        Pattern p = Pattern.compile(regex);
+
+        Matcher m = p.matcher(str);
+        while (m.find()) {
+            if (!"".equals(m.group())) {
+                digitList.add(Integer.valueOf(m.group()));
+            }
+        }
+        return digitList;
+    }
 
     //计算输入扫频范围的起点、终点所对应硬件当中的段号
     public int ComputeSegNumber(double frequence){
@@ -53,6 +68,7 @@ public class ComputePara {
         return segNumber;
 
     }
+
 
     //计算偏移量
     public int ComputeSegOffset(double frequence){
@@ -313,25 +329,26 @@ public class ComputePara {
 
     }
 
-    ////功率谱值的解析
     public float[] Bytes2Power(byte[] bytes){
         float[] pow=new float[1024];
         //
         for(int i=0;i<512;i++) {
-            float f1 = (float) (((((bytes[3*i] << 1) & 0xE0) + (bytes[3*i+1] >> 3)) & 0xff) + ((bytes[3*i+1] >> 2) & 0x01) * 0.5 +
-                    ((bytes[3*i+1] >> 1) & 0x01) * 0.25 + (bytes[3*i+1] & 0x01) * 0.125);
-            if (bytes[3*i] == 0) {
-                pow[2*i] = f1;
+//            float f1 = (float) (((((bytes[3*i] << 1) & 0xE0) + (bytes[3*i+1] >> 3)) & 0xff) + ((bytes[3*i+1] >> 2) & 0x01) * 0.5 +
+//                    ((bytes[3*i+1] >> 1) & 0x01) * 0.25 + (bytes[3*i+1] & 0x01) * 0.125);
+            int f1=(((bytes[3*i]>>4)&0x0f)<<8)+(bytes[3*i+1] & 0xff);
+            if (((bytes[3*i]>>7)&0x01) == 0) {
+                pow[2*i] = f1/16;
             } else {
-                pow[2*i] = -f1;
+                pow[2*i] = (float) ((f1-Math.pow(2,12))/16.0);
             }
 
-            float f2 = (float) ((((bytes[3*i] << 6) + (bytes[2+3*i] >> 3)) & 0xff) + ((bytes[2+3*i] >> 2) & 0x01) * 0.5 +
-                    ((bytes[2+3*i] >> 1) & 0x01) * 0.25 + (bytes[2+3*i] & 0x01) * 0.125);
+//            float f2 = (float) ((((bytes[3*i] << 6) + (bytes[2+3*i] >> 3)) & 0xff) + ((bytes[2+3*i] >> 2) & 0x01) * 0.5 +
+//                    ((bytes[2+3*i] >> 1) & 0x01) * 0.25 + (bytes[2+3*i] & 0x01) * 0.125);
+            int f2=((bytes[3*i]&0x0f)<<8)+(bytes[3*i+2] & 0xff);
             if (((bytes[3*i] >> 3) & 0x01) == 0) {
-                pow[1+2*i] = f2;
+                pow[1+2*i] = f2/16;
             } else {
-                pow[1+2*i] = -f2;
+                pow[1+2*i] =(float) ((f2-Math.pow(2,12))/16.0);
             }
         }
         return  pow;

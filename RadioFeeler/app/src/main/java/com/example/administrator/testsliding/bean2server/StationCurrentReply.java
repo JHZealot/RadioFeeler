@@ -22,12 +22,11 @@ public class StationCurrentReply implements Parcelable {
     private float modemPara;//调制参数
     private String work;//规定业务属性
     private float liveness;//活跃度
-    private int rule;//是否合法
+    private String  rule;//是否合法
 
     public  StationCurrentReply(){
 
     }
-
 
     protected StationCurrentReply(Parcel in) {
         ASICIIId = in.readString();
@@ -45,7 +44,7 @@ public class StationCurrentReply implements Parcelable {
         modemPara = in.readFloat();
         work = in.readString();
         liveness = in.readFloat();
-        rule = in.readInt();
+        rule = in.readString();
     }
 
     public static final Creator<StationCurrentReply> CREATOR = new Creator<StationCurrentReply>() {
@@ -63,11 +62,9 @@ public class StationCurrentReply implements Parcelable {
     public float getrPara() {
         return rPara;
     }
-
     public void setrPara(float rPara) {
         this.rPara = rPara;
     }
-
     public String getASICIIId() {
         return ASICIIId;
     }
@@ -124,8 +121,12 @@ public class StationCurrentReply implements Parcelable {
         return liveness;
     }
 
-    public int getRule() {
+    public String getRule() {
         return rule;
+    }
+
+    public void setRule(String rule) {
+        this.rule = rule;
     }
 
     public void setASICIIId(String ASICIIId) {
@@ -184,9 +185,6 @@ public class StationCurrentReply implements Parcelable {
         this.liveness = liveness;
     }
 
-    public void setRule(int rule) {
-        this.rule = rule;
-    }
 
     @Override
     public int describeContents() {
@@ -195,7 +193,6 @@ public class StationCurrentReply implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-
         dest.writeString(ASICIIId);
         dest.writeInt(IDcard);
         dest.writeString(longtitudeStyle);
@@ -211,8 +208,6 @@ public class StationCurrentReply implements Parcelable {
         dest.writeFloat(modemPara);
         dest.writeString(work);
         dest.writeFloat(liveness);
-        dest.writeInt(rule);
+        dest.writeString(rule);
     }
-
-
 }

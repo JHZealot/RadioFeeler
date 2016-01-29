@@ -27,6 +27,7 @@ public class Service_stations extends FragmentActivity {
     private List<Fragment> list;
     private Stations_register mStations_register;
     private Stations_current mStations_current;
+    private Station_All mstation_all;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,11 +61,12 @@ public class Service_stations extends FragmentActivity {
 
     private void fragmentPagerSetting() {
 
+        mstation_all=new Station_All();
         mStations_register = new Stations_register();
         mStations_current = new Stations_current();
 
         list = new ArrayList<Fragment>();
-
+        list.add(mstation_all);
         list.add(mStations_register);
         list.add(mStations_current);
 
@@ -74,7 +76,7 @@ public class Service_stations extends FragmentActivity {
     class TabAdapter_chart extends FragmentPagerAdapter {
 
         public String[] TITLES = new String[]
-                {"登记属性", "当前属性"};
+                {"全部台站属性","登记台站属性", "登记台站当前属性"};
 
         public TabAdapter_chart(FragmentManager fm) {
             super(fm);

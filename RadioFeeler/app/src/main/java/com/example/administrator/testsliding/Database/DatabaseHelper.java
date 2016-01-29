@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DB_NAME="myDatabase";//数据库名称
+    private static final String DB_NAME="sendFileDatabase";//数据库名称
     private static final String TABLE_NAME="localFile";//表名称
     private static final int  version=1;
     public DatabaseHelper(Context context) {
@@ -18,7 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String sql = "create table ["+TABLE_NAME+"](_id INTEGER PRIMARY KEY AUTOINCREMENT,fileName VARCHAR, start INT ,end INT ,isChanged SMALLINT,upload SMALLINT );";
+        String sql = "create table ["+TABLE_NAME+"](_id INTEGER PRIMARY KEY AUTOINCREMENT,fileName VARCHAR, start INT ,end INT ,isChanged SMALLINT ,upload SMALLINT);";
         db.execSQL(sql);
     }
 

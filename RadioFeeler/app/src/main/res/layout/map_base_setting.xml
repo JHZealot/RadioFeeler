@@ -16,13 +16,16 @@
         />
 
         <RadioGroup
+            android:id = "@+id/select_model_radio"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
             <RadioButton
+                android:id="@+id/munual_select_radio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="手动设置"/>
+                android:enabled="true"
+                android:text="@string/handSetting"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -32,37 +35,36 @@
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
                     android:layout_marginLeft="10dp"
-                    android:text="中心频率：" />
+                    android:text="@string/midiuFreq" />
                 <EditText
-                    android:id="@+id/edit1"
-                    android:layout_width="100dp"
+                    android:id="@+id/edit_center_radio"
+                    android:layout_width="80dp"
                     android:textSize="15sp"
+                    android:focusable="false"
+                    android:gravity="center"
                     android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MHz"/>
+
                 <TextView
                     android:layout_marginLeft="5dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
-                    android:text="带宽：" />
+                    android:text="@string/aband" />
                 <EditText
-                    android:id="@+id/edit2"
+                    android:id="@+id/bandwidth_radio"
                     android:textSize="15sp"
-                    android:layout_width="100dp"
+                    android:focusable="false"
+                    android:gravity="center"
+                    android:layout_width="80dp"
                     android:layout_height="wrap_content" />
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="MHz"/>
+
             </LinearLayout>
 
             <RadioButton
+                android:id="@+id/straight_select_radio"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="选择频段"/>
+                android:text="@string/chooseSeg"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
@@ -70,16 +72,61 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="15sp"
-                    android:layout_marginLeft="10dp"
-                    android:text="频段选择：" />
+                    android:layout_marginStart="10dp"
+                    android:text="@string/freqBand" />
                 <Spinner
-                    android:id="@+id/Spinner"
+                    android:id="@+id/Spinner_base_radio"
                     android:layout_width="220dp"
                     style="@style/spinner_style"
                     android:layout_height="wrap_content" />
             </LinearLayout>
         </RadioGroup>
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="区域地理半径/分辨率设置"
+        android:textSize="18sp"
+        android:gravity="bottom"
+        android:textColor="#000000"
+        android:background="#73b9a2"
 
+        />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
+            android:text="@string/radiuShow" />
+        <EditText
+            android:id="@+id/et_radius_radio"
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:paddingBottom="10dp"
+           android:gravity="center"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:textSize="15sp"
+            android:text="@string/dieta" />
+        <EditText
+            android:id="@+id/et_dieta_radio"
+            android:layout_width="160dp"
+            style="@style/spinner_style"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"/>
+    </LinearLayout>
 
     <TextView
         android:layout_width="fill_parent"
@@ -102,16 +149,20 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
             android:textSize="15sp"
-            android:text="动态刷新间隔时间：" />
-        <EditText
-            android:id="@+id/edit4"
-            android:layout_width="100dp"
-            android:textSize="15sp"
+            android:text="@string/freshTime" />
+       <EditText
+           android:id="@+id/et_freshTime_radio"
+           android:layout_width="160dp"
+           android:layout_height="40dp"
+           android:gravity="center"/>
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:hint="（min）" />
+            android:text="分"/>
     </LinearLayout>
 
     <TextView
+        android:layout_marginTop="10dp"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="设置时间"
@@ -137,7 +188,8 @@
             android:layout_height="wrap_content"
             android:textSize="10sp"
             android:focusable="false"
-            android:inputType="none"/>
+            android:inputType="none"
+            android:gravity="center"/>
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
@@ -155,13 +207,15 @@
             android:textSize="10sp"
             android:layout_height="wrap_content"
             android:focusable="false"
-            android:inputType="none"/>
+            android:inputType="none"
+            android:gravity="center"/>
     </LinearLayout>
     <Button
         android:id="@+id/btn_mapbase_setting"
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
         android:layout_gravity="center"
-        android:text="确定"/>
+        android:text="@string/setting"/>
 
 </LinearLayout>

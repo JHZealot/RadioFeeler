@@ -7,8 +7,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -26,8 +24,8 @@ import com.example.administrator.testsliding.Bean.InGain;
 import com.example.administrator.testsliding.Bean.OutGain;
 import com.example.administrator.testsliding.Bean.Query;
 import com.example.administrator.testsliding.Bean.Threshold;
-import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
 
 import java.util.ArrayList;
@@ -80,60 +78,58 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
     private boolean isFixedGate;
 
 
-
-    private BroadcastReceiver ServiceReceiver=new BroadcastReceiver() {
+    private BroadcastReceiver ServiceReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            String action=intent.getAction();
+            String action = intent.getAction();
 
-            if(action.equals(ConstantValues.InGainQuery)){
-                InGain data=intent.getParcelableExtra("data");
-                if (data==null){
+            if (action.equals(ConstantValues.InGainQuery)) {
+                InGain data = intent.getParcelableExtra("data");
+                if (data == null) {
                     return;
                 }
-                int a=data.getIngain()-3;
+                int a = data.getIngain() - 3;
 
-                Toast toast=Toast.makeText(SetPara.this, "接受通道增益：" + String.valueOf(a)+"dB",
+                Toast toast = Toast.makeText(SetPara.this, "接受通道增益：" + String.valueOf(a) + "dB",
                         Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP , 0, 400);
+                toast.setGravity(Gravity.TOP, 0, 400);
                 toast.show();
             }
-            if(action.equals(ConstantValues.OutGainQuery)){
-                OutGain data=intent.getParcelableExtra("data");
-                if (data==null){
+            if (action.equals(ConstantValues.OutGainQuery)) {
+                OutGain data = intent.getParcelableExtra("data");
+                if (data == null) {
                     return;
                 }
-                int a=data.getOutGain();
+                int a = data.getOutGain();
 
-                Toast toast=Toast.makeText(SetPara.this, "发射通道增益：" + String.valueOf(a)+"dB",
+                Toast toast = Toast.makeText(SetPara.this, "发射通道增益：" + String.valueOf(a) + "dB",
                         Toast.LENGTH_LONG);
-                toast.setGravity(Gravity.TOP , 0, 800);
+                toast.setGravity(Gravity.TOP, 0, 800);
                 toast.show();
             }
 
-            if(action.equals(ConstantValues.ThresholdQuery)){
-                Threshold data=intent.getParcelableExtra("data");
-                if (data==null){
+            if (action.equals(ConstantValues.ThresholdQuery)) {
+                Threshold data = intent.getParcelableExtra("data");
+                if (data == null) {
                     return;
                 }
-                int model=data.getThresholdModel();
-                int fixTheshold=data.getFixThreshold();
-                int autoTheshold=data.getAutoThreshold();
+                int model = data.getThresholdModel();
+                int fixTheshold = data.getFixThreshold();
+                int autoTheshold = data.getAutoThreshold();
 
-                if(model==0){
-                    Toast toast=Toast.makeText(SetPara.this, "自适应门限检测：" + String.valueOf(autoTheshold)+"dB",
+                if (model == 0) {
+                    Toast toast = Toast.makeText(SetPara.this, "自适应门限检测：" + String.valueOf(findAutoThreshold(autoTheshold)) + "dB",
                             Toast.LENGTH_LONG);
-                    toast.setGravity(Gravity.TOP , 0, 1000);
+                    toast.setGravity(Gravity.TOP, 0, 1000);
                     toast.show();
 
-                }else if(model==1) {
+                } else if (model == 1) {
                     Toast toast = Toast.makeText(SetPara.this, "固定门限检测：" + String.valueOf(fixTheshold) + "dB",
                             Toast.LENGTH_LONG);
                     toast.setGravity(Gravity.TOP, 0, 1000);
                     toast.show();
                 }
             }
-
 
 
         }
@@ -201,7 +197,7 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
 
         //弹出框查询
 
-        isFixedGate=true;
+        isFixedGate = true;
 
 
     }
@@ -229,12 +225,11 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
     }
 
 
-
     private void initEvent() {
         /**
          * 接收通道增益
          */
-        final InGain inGain= new InGain();
+        final InGain inGain = new InGain();
         mInButton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -252,13 +247,13 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
 
             @Override
             public void onClick(View v) {
-                Query query=new Query();
+                Query query = new Query();
                 query.setequipmentID(0);
-                query.setFuncID((byte)0x14);
+                query.setFuncID((byte) 0x14);
 
 //                if(query!=null){
-                    Broadcast.sendBroadCast(SetPara.this,
-                            ConstantValues.InGainQuery,"InGainQuery",query);
+                Broadcast.sendBroadCast(SetPara.this,
+                        ConstantValues.InGainQuery, "InGainQuery", query);
 //                }
 
 
@@ -266,8 +261,8 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
         });
         /**
          * 发射通道增益
-        */
-        final OutGain outGain= new OutGain();
+         */
+        final OutGain outGain = new OutGain();
         mOutButton1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -285,13 +280,13 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
         mOutButton2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Query query=new Query();
+                Query query = new Query();
                 query.setequipmentID(0);
-                query.setFuncID((byte)0x15);
+                query.setFuncID((byte) 0x15);
 
-                if(query!=null){
+                if (query != null) {
                     Broadcast.sendBroadCast(SetPara.this,
-                            ConstantValues.OutGainQuery,"OutGainQuery",query);
+                            ConstantValues.OutGainQuery, "OutGainQuery", query);
                 }
 
             }
@@ -302,7 +297,7 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
          * 检测门限设置
          */
 
-        final Threshold threshold=new Threshold();
+        final Threshold threshold = new Threshold();
         mSetThresholdButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -311,11 +306,11 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
                 threshold.setAutoThreshold(autoThreshold);
                 threshold.setFixThreshold(fixThreshold);
                 threshold.setThresholdModel(ThresholdModel);
-                if(threshold==null){
+                if (threshold == null) {
                     return;
                 }
                 Broadcast.sendBroadCast(SetPara.this,
-                        ConstantValues.ThresholdSet,"ThresholdSet",threshold);
+                        ConstantValues.ThresholdSet, "ThresholdSet", threshold);
 
             }
         });
@@ -334,8 +329,8 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
                             ConstantValues.ThresholdQuery, "ThresholdQuery", query);
                 }
 
-        }
-    });
+            }
+        });
 
         findViewById(R.id.title_back).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -345,14 +340,7 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
         });
 
 
-
-
     }
-
-
-
-
-
 
 
     /**
@@ -369,6 +357,7 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
 
 
     }
+
     /**
      * 查询接受通道增益弹出框
      */
@@ -383,7 +372,6 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
 
 
     }
-
 
 
     /**
@@ -430,8 +418,8 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
                 /**
                  * 固定门限显示
                  */
-                ThresholdModel=0x01;
-                isFixedGate=true;
+                ThresholdModel = 0x01;
+                isFixedGate = true;
                 reLay01.setVisibility(View.VISIBLE);
                 reLay02.setVisibility(View.GONE);
                 break;
@@ -439,8 +427,8 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
                 /**
                  * 自定义门限显示
                  */
-                ThresholdModel=0x00;
-                isFixedGate=false;
+                ThresholdModel = 0x00;
+                isFixedGate = false;
                 reLay01.setVisibility(View.GONE);
                 reLay02.setVisibility(View.VISIBLE);
                 break;
@@ -498,7 +486,7 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
                 break;
             case R.id.seekBar_test:
                 tv_test.setText("当前值：" + progress);
-                fixThreshold=progress;
+                fixThreshold = progress;
                 break;
         }
     }
@@ -516,7 +504,36 @@ public class SetPara extends Activity implements SeekBar.OnSeekBarChangeListener
     @Override
     protected void onDestroy() {
         unregisterReceiver(ServiceReceiver);
-        ServiceReceiver=null;
+        ServiceReceiver = null;
         super.onDestroy();
     }
+
+    private int findAutoThreshold(int index) {
+        int shold = 0;
+        switch (index) {
+            case 0:
+                shold = 3;
+                break;
+            case 1:
+                shold = 10;
+                break;
+            case 2:
+                shold = 20;
+                break;
+            case 3:
+                shold = 25;
+                break;
+            case 4:
+                shold = 30;
+                break;
+            case 5:
+                shold = 40;
+                break;
+            default:
+                break;
+        }
+        return shold;
+
+    }
+
 }

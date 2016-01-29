@@ -1,6 +1,5 @@
 package com.example.administrator.testsliding.packet;
 
-import com.example.administrator.testsliding.Encode.Send_ServiceRadio;
 
 /**
  * 与中心站服务请求数据帧
@@ -201,26 +200,26 @@ public class RequestToServicePacket {
         return  data;
     }
 
-    /**
-     *国家无线电频率规划查询
-     * @return
-     */
-    public void  RequestWielessPlan(Send_ServiceRadio radio){
-         //radio=new Send_ServiceRadio();
-
-        byte[] data=new byte[11];
-        data[0]=0x55;
-        data[1]= (byte) 0xA7;
-        data[2]=(byte) ((radio.equipmentID >> 8) & 0xff);//设备ID号的高位
-        data[3]=(byte) (radio.equipmentID & 0xff);//设备ID号的低8位
-        data[4]= (byte) ((radio.startFrequency>>8)&0xff);//整数部分高八位
-        data[5]= (byte) (radio.startFrequency&0xff);
-        data[6]= (byte) ((radio.endFrequency>>8)&0xff);//整数部分高八位
-        data[7]= (byte) (radio.endFrequency&0xff);
-        data[10]= (byte) 0xAA;
-       // return  data;
-
-    }
+//    /**
+//     *国家无线电频率规划查询
+//     * @return
+//     */
+//    public void  RequestWielessPlan(Send_ServiceRadio radio){
+//         //radio=new Send_ServiceRadio();
+//
+//        byte[] data=new byte[11];
+//        data[0]=0x55;
+//        data[1]= (byte) 0xA7;
+//        data[2]=(byte) ((radio.equipmentID >> 8) & 0xff);//设备ID号的高位
+//        data[3]=(byte) (radio.equipmentID & 0xff);//设备ID号的低8位
+//        data[4]= (byte) ((radio.startFrequency>>8)&0xff);//整数部分高八位
+//        data[5]= (byte) (radio.startFrequency&0xff);
+//        data[6]= (byte) ((radio.endFrequency>>8)&0xff);//整数部分高八位
+//        data[7]= (byte) (radio.endFrequency&0xff);
+//        data[10]= (byte) 0xAA;
+//       // return  data;
+//
+//    }
 
     /**
      * 历史功率谱数据查询服务帧

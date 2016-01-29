@@ -1,8 +1,5 @@
 package com.example.administrator.testsliding.Bean;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
 /**
  * Created by jinaghao on 15/12/1.
  */

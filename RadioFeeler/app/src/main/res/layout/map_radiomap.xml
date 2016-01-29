@@ -11,38 +11,4 @@
         android:layout_height="fill_parent"
         android:clickable="true" />
 
-
-
-    <ImageButton
-        android:id="@+id/RouteMap_radio"
-        android:layout_marginTop="30dp"
-        android:layout_marginLeft="300dp"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/routemap_button" />
-
-    <TextView
-        android:id="@+id/RouteMap_radio_text"
-        android:layout_marginLeft="302dp"
-        android:layout_marginTop="80dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:text="路径图" />
-    <ImageButton
-        android:id="@+id/HeatMap_radio"
-        android:layout_marginLeft="300dp"
-        android:layout_marginTop="100dp"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/heatmap_button" />
-    <TextView
-        android:id="@+id/HeatMap_radio_text"
-        android:layout_marginLeft="302dp"
-        android:layout_marginTop="150dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="15sp"
-        android:text="态势图"/>
-
 </RelativeLayout>

@@ -3,10 +3,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
     android:background="#ffffffff">
     <TextView
-
+        android:layout_marginTop="60dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="请输入需要查看的频率范围："
@@ -17,6 +16,7 @@
         android:layout_height="40dp"
         android:gravity="center">
         <EditText
+            android:id="@+id/et_registerStart"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
@@ -26,6 +26,7 @@
             android:text="——"
             android:textColor="#000000"/>
         <EditText
+            android:id="@+id/et_registerEnd"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"/>
@@ -37,7 +38,8 @@
     </LinearLayout>
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_marginTop="20dp"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
         android:text="查看"
         android:id="@+id/btn_queryregister"

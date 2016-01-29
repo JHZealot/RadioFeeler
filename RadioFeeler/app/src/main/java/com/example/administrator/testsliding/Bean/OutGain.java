@@ -35,14 +35,14 @@ public class OutGain implements Parcelable{
         OutGain = in.readInt();
     }
 
-    public static final Creator<OutGain> CREATOR = new Creator<OutGain>() {
+    public static final Creator<com.example.administrator.testsliding.Bean.OutGain> CREATOR = new Creator<com.example.administrator.testsliding.Bean.OutGain>() {
         @Override
-        public OutGain createFromParcel(Parcel in) {
+        public com.example.administrator.testsliding.Bean.OutGain createFromParcel(Parcel in) {
             return new OutGain(in);
         }
 
         @Override
-        public OutGain[] newArray(int size) {
+        public com.example.administrator.testsliding.Bean.OutGain[] newArray(int size) {
             return new OutGain[size];
         }
     };

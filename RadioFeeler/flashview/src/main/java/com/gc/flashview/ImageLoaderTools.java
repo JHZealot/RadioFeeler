@@ -30,11 +30,12 @@ public class ImageLoaderTools{
 		}
 	}
 
+	//返回�??个ImageLoader对象
     private static ImageLoader initImageLoader(Context context) {
 		DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
-        .cacheInMemory(false)//设置下载的图片是否缓存在内存
+        .cacheInMemory(false)//设置下载的图片是否缓存在内存�??
         .cacheOnDisc(false)//设置下载的图片是否缓存在SD卡中
-        .showStubImage(R.drawable.image_holder)//设置下载期间显示的图
+        .showStubImage(R.drawable.image_holder)//设置下载期间显示的图�?
         .showImageForEmptyUri(R.drawable.image_holder)//设置图片URI为空或是错误的时候显示的图片
         .showImageOnFail(R.drawable.image_holder)//设置图片加载/解码过程中错误时候显示的图片
         .build();

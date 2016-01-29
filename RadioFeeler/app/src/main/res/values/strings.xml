@@ -48,6 +48,7 @@
     <string name="demo_name_offline">离线地图模块</string>
     <string name="demo_name_geometry">电磁路径图</string>
     <string name="demo_name_radio">电磁辐射图</string>
+    <string name="demo_name_stationMap">台站分布图</string>
 
     <string name="service">服务</string>
     <string name="chart">图表</string>
@@ -71,7 +72,44 @@
     <string name="IQ_starChart">星座图</string>
 <string name="IQ_name">历史IQ波</string>
 
+    <string name="stationNum">序号</string>
+    <string name="organizer">归属单位</string>
+    <string name="IDcard">识别码</string>
+    <string name="location">经纬度，高度</string>
+    <string name="range">中心频率许可范围（MHz）</string>
+    <string name="power">额定功率(dBm)</string>
+    <string name="band">额定带宽(dBm)</string>
+    <string name="modem">调制方式</string>
+    <string name="modemPara">调制参数</string>
+    <string name="attributes">业务属性</string>
+    <string name="radius">标称半径(Km)</string>
+    <string name="liveness">活跃度</string>
+    <string name="ID">ID号</string>
+    <string name="terminalStyle">终端类型</string>
+    <string name="midiuFreq">中心频率(MHz)</string>
+    <string name="equalPower">等效发射功率(dBm)</string>
+    <string name="radioR">电波传播路径损耗指数r</string>
+    <string name="aband">带宽(MHz)</string>
+    <string name="rule">是否合法</string>
+    <string name="FPGAID">终端硬件型号</string>
+    <string name="workFreq">接收通道工作频率(MHz)</string>
+    <string name="segFreq">频段范围(MHz)</string>
+    <string name="ModifyInGainValue">接收通道增益值(dB)</string>
+    <string name="AntennaID">接收天线型号</string>
+    <string name="AntennaFreq">接收天线工作频率(MHz)</string>
+    <string name="AntennaValue">接收天线增益值(MHz)</string>
+    <string name="handSetting">手动设置</string>
+    <string name="chooseSeg">选择频段</string>
+    <string name="freqBand">频段选择：</string>
+    <string name="freshTime">刷新间隔</string>
+    <string name="radiuShow">查看半径(Km)</string>
+    <string name="dieta">经纬度分辨率△(0.1~31.7分)</string>
+    <string name="dataFrom">数据来源</string>
+    <string name="ftime">刷新时刻</string>
+    <string name="tlocation">位置信息</string>
+    <string name="pow">功率(dBm)</string>
 
     <string name="chaxunzhong">正在查询中...</string>
     <string name="ok">确定</string>
+
 </resources>

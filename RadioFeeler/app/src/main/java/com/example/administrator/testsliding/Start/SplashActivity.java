@@ -1,4 +1,4 @@
-package com.example.administrator.testsliding.Start;
+package com.example.administrator.testsliding.start;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -10,8 +10,10 @@ import android.view.WindowManager;
 import android.widget.TextView;
 
 import com.example.administrator.testsliding.Mina.MinaClientService;
-import com.example.administrator.testsliding.Mina.UpdateService;
+import com.example.administrator.testsliding.Mina.ToFileMinaService;
+import com.example.administrator.testsliding.Mina.ToServerMinaService;
 import com.example.administrator.testsliding.R;
+
 
 
 /**
@@ -30,14 +32,12 @@ private TextView tv01,tv02;
 
         super.onCreate(savedInstanceState);
 
+        Intent intent = new Intent(SplashActivity.this, ToServerMinaService.class);
+        startService(intent);
         Intent startServiceIntent=new Intent(SplashActivity.this, MinaClientService.class);
         startService(startServiceIntent);
-
-        Intent startUpdateService=new Intent(SplashActivity.this, UpdateService.class);
-        startService(startUpdateService);
-
-
-
+        Intent fileIntent = new Intent(SplashActivity.this, ToFileMinaService.class);
+        startService(fileIntent);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);

@@ -13,7 +13,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="20sp"/>
+           />
         <View
             android:background="#cccccc"
             android:layout_width="1dp"
@@ -27,7 +27,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="20sp"/>
+           />
         <View
             android:background="#cccccc"
             android:layout_width="1dp"
@@ -43,7 +43,7 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:gravity="center"
-            android:textSize="20sp"/>
+            />
 
     </LinearLayout>
 

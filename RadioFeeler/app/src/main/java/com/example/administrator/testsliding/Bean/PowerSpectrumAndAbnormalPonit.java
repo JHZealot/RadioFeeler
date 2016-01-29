@@ -12,7 +12,6 @@ public class PowerSpectrumAndAbnormalPonit {
     private int IsChange;
     private int totalBand;
     private int PSbandNum;//频段序号
-    private byte[] sweepModel2bandNum;//以上几个参数对应的字节数组，供写文件用
     private byte[] PSpower;//功率值
 
 
@@ -51,9 +50,7 @@ public class PowerSpectrumAndAbnormalPonit {
         this.PSbandNum = PSbandNum;
     }
 
-    public void setSweepModel2bandNum(byte[] sweepModel2bandNum) {
-        this.sweepModel2bandNum = sweepModel2bandNum;
-    }
+
 
     public void setPSpower(byte[] PSpower) {
         this.PSpower = PSpower;
@@ -100,9 +97,7 @@ public class PowerSpectrumAndAbnormalPonit {
         return PSbandNum;
     }
 
-    public byte[] getSweepModel2bandNum() {
-        return sweepModel2bandNum;
-    }
+
 
     public byte[] getPSpower() {
         return PSpower;

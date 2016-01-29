@@ -25,8 +25,8 @@ import android.widget.Toast;
 import com.example.administrator.testsliding.Bean.Press;
 import com.example.administrator.testsliding.Bean.PressSetting;
 import com.example.administrator.testsliding.Bean.Query;
-import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
 
 import java.util.ArrayList;
@@ -588,6 +588,7 @@ public class Fragment_work_model3  extends Fragment implements
     public void onDestroy() {
         super.onDestroy();
         getActivity().unregisterReceiver(PressReceiver);
+        PressReceiver=null;
     }
 
 }

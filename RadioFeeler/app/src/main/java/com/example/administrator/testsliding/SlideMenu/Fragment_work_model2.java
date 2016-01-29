@@ -17,15 +17,13 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.example.administrator.testsliding.Bean.FixCentralFreq;
 import com.example.administrator.testsliding.Bean.FixSetting;
 import com.example.administrator.testsliding.Bean.Query;
-import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
-
-import com.example.administrator.testsliding.compute.StringTime2bytes;
+import com.example.administrator.testsliding.compute.ComputePara;
 import com.example.administrator.testsliding.view.DateTimePickDialogUtil;
 
 import java.util.ArrayList;
@@ -62,6 +60,8 @@ public class Fragment_work_model2 extends Fragment {
     //全局变量
     private double IQwidth;
     private int blockNum;
+
+    private ComputePara computePara=new ComputePara();
 
 
     private BroadcastReceiver fixFreqReceiver =new BroadcastReceiver() {
@@ -285,9 +285,8 @@ public class Fragment_work_model2 extends Fragment {
                     FixSetting fixSetting=new FixSetting();
                     fixSetting.setIQwidth(IQwidth);
                     fixSetting.setBlockNum(blockNum);
-                    StringTime2bytes stringTime2bytes=new StringTime2bytes();
                     List<Integer> digitList ;
-                    digitList=stringTime2bytes.Time2Bytes(inputDate.getText().toString());
+                    digitList=computePara.Time2Int(inputDate.getText().toString());
                     fixSetting.setYear(digitList.get(0));
                     fixSetting.setMonth(digitList.get(1));
                     fixSetting.setDay(digitList.get(2));
@@ -338,6 +337,7 @@ public class Fragment_work_model2 extends Fragment {
     @Override
     public void onDestroy() {
         getActivity().unregisterReceiver(fixFreqReceiver);
+        fixFreqReceiver=null;
         super.onDestroy();
     }
 

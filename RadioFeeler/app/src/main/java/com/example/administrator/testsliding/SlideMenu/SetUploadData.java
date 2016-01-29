@@ -16,8 +16,8 @@ import android.widget.Toast;
 import com.example.administrator.testsliding.Bean.Connect;
 import com.example.administrator.testsliding.Bean.Query;
 import com.example.administrator.testsliding.Bean.UploadData;
-import com.example.administrator.testsliding.Broadcast.Broadcast;
 import com.example.administrator.testsliding.GlobalConstants.ConstantValues;
+import com.example.administrator.testsliding.Mina.Broadcast;
 import com.example.administrator.testsliding.R;
 
 /**
@@ -124,5 +124,6 @@ public class SetUploadData extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(SetUploadDataReceiver);
+        SetUploadDataReceiver=null;
     }
 }

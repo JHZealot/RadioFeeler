@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by Administrator on 2015/7/21.
@@ -64,9 +66,9 @@ public class Share_fragment extends Fragment {
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
+                int a = (int) msg.obj;
+                mSeekbar.setProgress(a);
 
-            int a = (int) msg.obj;
-            mSeekbar.setProgress(a);
         }
     };
 
@@ -94,188 +96,219 @@ public class Share_fragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mSeekbar.setVisibility(View.VISIBLE);
+                mSeekbar.setProgress(0);
                 mSeekbar.setMax(10);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        int uploadFileCountPercent = 0;//它的取值区间是1到10
-                        Looper.prepare();
+                TimerTask task = new TimerTask(){
+                    public void run(){
+                        //实现自己的延时执行任务
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                int uploadFileCountPercent = 0;//它的取值区间是1到10
+                                Looper.prepare();
 
 
 //                        ArrayList fileName = GetFileName(PSFILE_PATH);
-                        if (myApplication.getFileUploadMode() == 1) {
-                            Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
-                            while(c.moveToNext()){
-                                int i=0,fileNum=0;
-                                i++;
-                                fileNum=c.getCount();
-                                //上传文件达到十分之一时候更新进度条
-                                if (i % (fileNum/10) == 0) {
-                                    uploadFileCountPercent++;
-                                    handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
-                                }
-                                //上传文件
-                                String name=c.getString(c.getColumnIndex("fileName"));
-                                File file = new File(PSFILE_PATH,name);
-                                try {
-                                    fis = new FileInputStream(file);
-                                    dis = new DataInputStream(fis);
-                                    byte[] content = new byte[fis.available()];
-                                    byte[] buffer = new byte[content.length];
-                                    while ((fis.read(buffer)) != -1) {
-                                        content = buffer;
+                                if (myApplication.getFileUploadMode() == 1) {
+                                    int i = 0, fileNum = 0;
+                                    Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
+                                    fileNum = c.getCount();
+
+                                    while (c.moveToNext()) {
+                                        i++;
+                                        //上传文件达到十分之一时候更新进度条
+                                        if (fileNum >= 10) {
+                                            if (i % (fileNum / 10) == 0) {
+                                                uploadFileCountPercent++;
+                                                handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
+                                            }
+                                        } else {
+                                            handler.obtainMessage(1, 10).sendToTarget();
+                                        }
+                                        //上传文件
+                                        String name = c.getString(c.getColumnIndex("fileName"));
+                                        File file = new File(PSFILE_PATH, name);
+                                        try {
+                                            fis = new FileInputStream(file);
+//                                    dis = new DataInputStream(new FileInputStream(file));
+                                            byte[] content = new byte[fis.available()];
+                                            byte[] buffer = new byte[content.length];
+                                            while ((fis.read(buffer)) != -1) {
+                                                content = buffer;
+                                            }
+                                            //将文件里的内容转化为对象
+                                            ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                            ToPS.setContent(content);
+                                            ToPS.setContentLength(content.length);
+                                            ToPS.setFileName(name);
+                                            ToPS.setFileNameLength((short) name.getBytes(Charset.forName("UTF-8")).length);
+                                            //将功率谱对象用服务器的session发出去
+                                            Constants.FILEsession.write(ToPS);
+                                            //在这里更新数据库，将文件是否上传的标志位置为1
+                                            ContentValues cvUpload = new ContentValues();
+                                            cvUpload.put("upload", 1);
+                                            db.update("localFile", cvUpload, "filename=?", new String[]{name});
+                                        } catch (FileNotFoundException e) {
+                                            e.printStackTrace();
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                            Looper.loop();// 进入loop中的循环，查看消息队列
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                            Looper.loop();// 进入loop中的循环，查看消息队列
+                                        } finally {
+                                            try {
+                                                if (fis != null) {
+
+                                                    fis.close();
+                                                }
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+
                                     }
-                                    //将文件里的内容转化为对象
-                                    ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
-                                    ToPS.setContent(content);
-                                    ToPS.setContentLength(content.length);
-                                    ToPS.setFileName(name);
-                                    ToPS.setFileNameLength((short)name.getBytes(Charset.forName("UTF-8")).length);
-                                    //将功率谱对象用服务器的session发出去
-                                    Constants.SERVERsession.write(ToPS);
-                                    //在这里更新数据库，将文件是否上传的标志位置为1
-                                    ContentValues cvUpload=new ContentValues();
-                                    cvUpload.put("upload",1);
-                                    db.update("localFile",cvUpload,"filename=?",new String[]{name});
-                                } catch (FileNotFoundException e) {
-                                    e.printStackTrace();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                    Looper.loop();// 进入loop中的循环，查看消息队列
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                    Looper.loop();// 进入loop中的循环，查看消息队列
-                                } finally {
-                                    try {
-                                        fis.close();
-                                        dis.close();
+                                    if (c != null) {
+
                                         c.close();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
                                     }
-                                }
 
-                            }
-
-                        } else if (myApplication.getFileUploadMode() == 2) {
-                            //自动门限上传
-                            Cursor c = db.rawQuery("SELECT filename from localFile  where isChanged=1 AND upload=0", null);
+                                } else if (myApplication.getFileUploadMode() == 2) {
+                                    //自动门限上传
+                                    Cursor c = db.rawQuery("SELECT filename from localFile  where isChanged=1 AND upload=0", null);
 //                            Cursor c = db.query("loaclFile",null,null,null,null,null,null);//查询并获得游标
-                            while (c.moveToNext()) {//判断游标是否为空
-                                    String name = c.getString(c.getColumnIndex("fileName"));
-                                    //上传文件
-                                    File file = new File(PSFILE_PATH, name);
-                                    try {
-                                        fis = new FileInputStream(file);
-                                        dis = new DataInputStream(fis);
-                                        byte[] content = new byte[fis.available()];
-                                        byte[] buffer = new byte[content.length];
-                                        while ((fis.read(buffer)) != -1) {
-                                            content = buffer;
-                                        }
-                                        //将文件里的内容转化为对象
-                                        ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
-                                        ToPS.setContent(content);
-                                        ToPS.setContentLength(content.length);
-                                        ToPS.setFileName(name);
-                                        ToPS.setFileNameLength((short)name.getBytes(Charset.forName("UTF-8")).length);
-                                        //将功率谱对象用服务器的session发出去
-                                        Constants.SERVERsession.write(ToPS);
-                                        //在这里更新数据库，将文件是否上传的标志位置为1
-                                        ContentValues cvUpload=new ContentValues();
-                                        cvUpload.put("upload",1);
-                                        db.update("localFile",cvUpload,"filename=?",new String[]{name});
-                                    } catch (FileNotFoundException e) {
-                                        e.printStackTrace();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();// 进入loop中的循环，查看消息队列
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();// 进入loop中的循环，查看消息队列
-                                    } finally {
+                                    while (c.moveToNext()) {//判断游标是否为空
+                                        String name = c.getString(c.getColumnIndex("fileName"));
+                                        //上传文件
+                                        File file = new File(PSFILE_PATH, name);
                                         try {
-                                            fis.close();
-                                            dis.close();
-                                            c.close();
+                                            fis = new FileInputStream(file);
+//                                        dis = new DataInputStream(fis);
+                                            byte[] content = new byte[fis.available()];
+                                            byte[] buffer = new byte[content.length];
+                                            while ((fis.read(buffer)) != -1) {
+                                                content = buffer;
+                                            }
+                                            //将文件里的内容转化为对象
+                                            ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                            ToPS.setContent(content);
+                                            ToPS.setContentLength(content.length);
+                                            ToPS.setFileName(name);
+                                            ToPS.setFileNameLength((short) name.getBytes(Charset.forName("UTF-8")).length);
+                                            //将功率谱对象用服务器的session发出去
+                                            Constants.FILEsession.write(ToPS);
+                                            //在这里更新数据库，将文件是否上传的标志位置为1
+                                            ContentValues cvUpload = new ContentValues();
+                                            cvUpload.put("upload", 1);
+                                            db.update("localFile", cvUpload, "filename=?", new String[]{name});
+                                        } catch (FileNotFoundException e) {
+                                            e.printStackTrace();
                                         } catch (IOException e) {
                                             e.printStackTrace();
+                                            Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                            Looper.loop();// 进入loop中的循环，查看消息队列
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                            Looper.loop();// 进入loop中的循环，查看消息队列
+                                        } finally {
+                                            try {
+                                                if (fis != null) {
+
+                                                    fis.close();
+                                                }
+
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                            }
                                         }
                                     }
-                            }
+                                    if (c != null) {
 
+                                        c.close();
+                                    }
 
-                        } else if (myApplication.getFileUploadMode() == 3) {
-                            //抽取上传
-                            int pace = myApplication.getUpRate() ;
-                            Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
-                            int i=0;
-                            int fileNum=c.getCount();
-                            while(c.moveToNext()){
-                                if(i%pace==0){
+                                } else if (myApplication.getFileUploadMode() == 3) {
+                                    //抽取上传
+                                    int pace = myApplication.getUpRate();
+                                    Cursor c = db.rawQuery("SELECT filename from localFile  where  upload=0", null);
+                                    int i = 0;
+                                    int fileNum = c.getCount();
+                                    while (c.moveToNext()) {
+                                        if (i % pace == 0) {
 
-                                    String name = c.getString(c.getColumnIndex("fileName"));
-                                    //上传文件
-                                    File file = new File(PSFILE_PATH,name);
-                                    try {
-                                        fis = new FileInputStream(file);
-                                        dis = new DataInputStream(fis);
-                                        byte[] content = new byte[fis.available()];
-                                        byte[] buffer = new byte[content.length];
-                                        while ((fis.read(buffer)) != -1) {
-                                            content = buffer;
+                                            String name = c.getString(c.getColumnIndex("fileName"));
+                                            //上传文件
+                                            File file = new File(PSFILE_PATH, name);
+                                            try {
+                                                fis = new FileInputStream(file);
+//                                        dis = new DataInputStream(fis);
+                                                byte[] content = new byte[fis.available()];
+                                                byte[] buffer = new byte[content.length];
+                                                while ((fis.read(buffer)) != -1) {
+                                                    content = buffer;
+                                                }
+                                                //将文件里的内容转化为对象
+                                                ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
+                                                ToPS.setContent(content);
+                                                ToPS.setContentLength(content.length);
+                                                ToPS.setFileName(name);
+                                                ToPS.setFileNameLength((short) name.getBytes(Charset.forName("UTF-8")).length);
+                                                //将功率谱对象用服务器的session发出去
+                                                Constants.FILEsession.write(ToPS);
+                                                //在这里更新数据库，将文件是否上传的标志位置为1
+                                                ContentValues cvUpload = new ContentValues();
+                                                cvUpload.put("upload", 1);
+                                                db.update("localFile", cvUpload, "filename=?", new String[]{name});
+                                            } catch (FileNotFoundException e) {
+                                                e.printStackTrace();
+                                            } catch (IOException e) {
+                                                e.printStackTrace();
+                                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                                Looper.loop();// 进入loop中的循环，查看消息队列
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
+                                                Looper.loop();// 进入loop中的循环，查看消息队列
+                                            } finally {
+                                                try {
+                                                    if (fis != null) {
+
+                                                        fis.close();
+                                                    }
+
+                                                } catch (IOException e) {
+                                                    e.printStackTrace();
+                                                }
+                                            }
                                         }
-                                        //将文件里的内容转化为对象
-                                        ToServerPowerSpectrumAndAbnormalPoint ToPS = new ToServerPowerSpectrumAndAbnormalPoint();
-                                        ToPS.setContent(content);
-                                        ToPS.setContentLength(content.length);
-                                        ToPS.setFileName(name);
-                                        ToPS.setFileNameLength((short) name.getBytes(Charset.forName("UTF-8")).length);
-                                        //将功率谱对象用服务器的session发出去
-                                        Constants.SERVERsession.write(ToPS);
-                                        //在这里更新数据库，将文件是否上传的标志位置为1
-                                        ContentValues cvUpload=new ContentValues();
-                                        cvUpload.put("upload",1);
-                                        db.update("localFile",cvUpload,"filename=?",new String[]{name});
-                                    } catch (FileNotFoundException e) {
-                                        e.printStackTrace();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
-                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();// 进入loop中的循环，查看消息队列
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        Toast.makeText(getActivity(), "请连接服务器", Toast.LENGTH_SHORT).show();
-                                        Looper.loop();// 进入loop中的循环，查看消息队列
-                                    } finally {
-                                        try {
-                                            fis.close();
-                                            dis.close();
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
+                                        i++;
+                                        //上传文件达到十分之一时候更新进度条
+                                        if (i % (fileNum / 10) == 0) {
+                                            uploadFileCountPercent++;
+                                            handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
                                         }
+                                    }
+                                    if (c != null) {
+
+                                        c.close();
                                     }
 
                                 }
-                                i++;
-                                //上传文件达到十分之一时候更新进度条
-                                if (i % (fileNum/ 10) == 0) {
-                                    uploadFileCountPercent++;
-                                    handler.obtainMessage(1, uploadFileCountPercent).sendToTarget();
-                                }
-
+                                Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
+                                Looper.loop();
                             }
-
-                        }
-                        Toast.makeText(getActivity(), "上传成功", Toast.LENGTH_SHORT).show();
-                        Looper.loop();
+                        }).start();
                     }
-                }).start();
+                };
+                Timer timer = new Timer();
+                timer.schedule(task,1000,60000);
+
+
             }
+
         });
 
         /**

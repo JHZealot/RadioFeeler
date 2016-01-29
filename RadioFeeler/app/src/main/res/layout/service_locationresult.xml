@@ -16,290 +16,171 @@
         custom:titleTextSize="8sp">
 
     </com.example.administrator.testsliding.view.MyTopBar>>
-    <!--<ListView-->
-        <!--android:id="@+id/service_location_listview"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent">-->
 
-    <!--</ListView>-->
-    <TableLayout
-        android:id="@+id/tablelay_location"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="6"
-        android:background="#ffcccccc"
-        android:layout_margin="1dp"
-        >
-
-        <TableRow
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="异常信号中心频率(MHz)"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                >
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-
-
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="带宽（MHz）"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="调制方式、调制参数"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-        android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-        >
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="经纬度、高度"
-            android:layout_gravity="center_vertical"/>
-        <View
-            android:background="#cccccc"
-            android:layout_width="1dp"
-            android:layout_height="match_parent">
-
-        </View>
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:layout_gravity="center_vertical"/>
-    </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="辐射源等效发射功率(dBm)"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="电波传播路径损耗指数 r"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="时间占用度"
-                android:layout_gravity="center"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="业务属性"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent"
-                >
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="是否合法"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-        <TableRow
-
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1"
-            android:background="#ffffffff"
-            android:layout_margin="0.5dp"
-            >
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="2"
-                android:text="归属单位"
-                android:layout_gravity="center_vertical"/>
-            <View
-                android:background="#cccccc"
-                android:layout_width="1dp"
-                android:layout_height="match_parent">
-
-            </View>
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:layout_gravity="center_vertical"/>
-        </TableRow>
-
-    </TableLayout>
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        >
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:orientation="horizontal">
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:orientation="vertical" >
+
+            <TextView
+                android:text="@string/midiuFreq"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/aband"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/modem"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/modemPara"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/location"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textColor="#850"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+
+            <TextView
+                android:text="@string/equalPower"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/radioR"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+
+            <TextView
+                android:text="@string/liveness"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+
+            <TextView
+                android:text="@string/attributes"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+
+
+
+            <TextView
+                android:text="@string/rule"
+                android:layout_width="match_parent"
+                android:textColor="#850"
+                android:layout_height="40dp"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+            <TextView
+                android:text="@string/organizer"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:textColor="#850"
+                android:gravity="center" />
+            <View
+                android:background="#cccccc"
+                android:layout_height="1dp"
+                android:layout_width="match_parent">
+
+            </View>
+
+        </LinearLayout>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="452dp"
+            android:background="#ccc"/>
+
+        <ListView
+            android:id="@+id/listview_locationAbnormal"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="fill_parent"
+            android:cacheColorHint="@android:color/transparent"
+            android:scrollbars="none" >
+        </ListView>
 
     </LinearLayout>
 

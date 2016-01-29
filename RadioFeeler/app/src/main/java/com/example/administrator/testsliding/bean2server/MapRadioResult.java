@@ -22,6 +22,7 @@ public class MapRadioResult implements Parcelable{
 
     }
 
+
     protected MapRadioResult(Parcel in) {
         centralFreq = in.readInt();
         band = in.readInt();
@@ -30,6 +31,7 @@ public class MapRadioResult implements Parcelable{
         Nx = in.readInt();
         Ny = in.readInt();
         dieta = in.readFloat();
+        mapRadioPointInfoList = in.createTypedArrayList(MapRadioPointInfo.CREATOR);
     }
 
     public static final Creator<MapRadioResult> CREATOR = new Creator<MapRadioResult>() {
@@ -68,7 +70,7 @@ public class MapRadioResult implements Parcelable{
         return Ny;
     }
 
-    public float getDieta() {
+    public double getDieta() {
         return dieta;
     }
 
@@ -108,6 +110,7 @@ public class MapRadioResult implements Parcelable{
         this.mapRadioPointInfoList = mapRadioPointInfoList;
     }
 
+
     @Override
     public int describeContents() {
         return 0;
@@ -122,5 +125,6 @@ public class MapRadioResult implements Parcelable{
         dest.writeInt(Nx);
         dest.writeInt(Ny);
         dest.writeFloat(dieta);
+        dest.writeTypedList(mapRadioPointInfoList);
     }
 }
